@@ -3,8 +3,8 @@
 
 #include "ev_socket.hpp"
 
-#define MAX_EPOLL_EVENT_COUNT 1
-#define MAX_EPORL_TIMEOUT_MSEC  1
+#define MAX_EPOLL_EVENT_COUNT 256
+#define MAX_EPORL_TIMEOUT_MSEC  0
 
 class ev_app
 {
