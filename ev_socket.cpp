@@ -1020,6 +1020,10 @@ void ev_socket::close_socket ()
 
         tcp_close (isLinger, lingerTime);
 
+        if (is_set_state (STATE_SSL_CONN_ESTABLISHED)) {
+            SSL_set_shutdown (m_ssl, SSL_SENT_SHUTDOWN | SSL_RECEIVED_SHUTDOWN);
+        }
+
         if ( is_set_state (STATE_CONN_MARK_FINISH) == 0) {
             m_epoll_ctx->m_finish_list.push (this);
             set_state (STATE_CONN_MARK_FINISH);
