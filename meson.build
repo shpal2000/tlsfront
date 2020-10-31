@@ -1,25 +1,7 @@
-project('ev_sock', 'cpp',
-  version : '1.0',
-  default_options : ['warning_level=3'
-                      , 'cpp_std=c++17'])
-
 openssl = dependency('openssl')
+ev_socklib = shared_library('ev_sock'
+                            , sources : [ 'ev_socket.cpp', 'ev_app.cpp']
+                            , dependencies: [openssl]
+                            , include_directories : []
+                            , install : false)
 
-pkg = import('pkgconfig')
-
-install_headers([ 'ev_platform.hpp'
-                  , 'ev_socket.hpp'
-                  , 'ev_app.hpp']
-                  , subdir : 'ev_sock')
-
-ev_sock = static_library('ev_sock'
-                    , sources : ['ev_socket.cpp'
-                                  , 'ev_app.cpp']
-                    , dependencies: [openssl]
-                    , install : true)
-
-pkg.generate(libraries : ev_sock
-              , version : '1.0'
-              , name : 'ev_sock'
-              , subdirs: 'ev_sock'
-              , description: 'ev_socket, ev_app library')
