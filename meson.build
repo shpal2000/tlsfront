@@ -4,13 +4,16 @@ project('tlsfront', 'c', 'cpp',
                       , 'cpp_std=c++17'])
 
 openssl = dependency('openssl')
+nlohmann_json_proj = subproject('json')
+nlohmann_json_dep = nlohmann_json_proj.get_variable('nlohmann_json_dep')
+
 incdirs = include_directories(['./tlspack-socket/'])
 
 subdir ('tlspack-socket')
 
 executable('tlsfront.exe'
-            , sources : [ 'main.cpp']
-            , dependencies: [openssl]
+            , sources : [ 'app.cpp']
+            , dependencies: [openssl, nlohmann_json_dep]
             , include_directories : [incdirs]
             , link_with : [ev_socklib]
             , build_rpath : '/rundir/lib'
