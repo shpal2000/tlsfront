@@ -1,8 +1,12 @@
 #include "tlsfront_tcp.hpp"
 
-
-int main(int /*argc*/, char ** /*argv*/)
+tlsfront_tcp_app::tlsfront_tcp_app(json cfgj, tlsfront_tcp_stats* gstats)
 {
-    return 0;
+
+}
+
+tlsfront_tcp_app::~tlsfront_tcp_app()
+{
+
 }
 

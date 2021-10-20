@@ -117,7 +117,10 @@ struct app_stats : public ev_sockstats
 class app : public ev_app
 {
 public:
-    app(json cfg_json, app_stats* group_stats);
+    app()
+    {
+        
+    }
 
     virtual ~app()
     {
