@@ -1,6 +1,6 @@
 mkdir subprojects
 cd subprojects
-https://github.com/nlohmann/json.git
+git clone https://github.com/nlohmann/json.git
 
 
 meson build

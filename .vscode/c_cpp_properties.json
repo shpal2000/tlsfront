@@ -6,7 +6,8 @@
                 "${default}",
                 "${workspaceFolder}/tlspack-socket",
                 "${workspaceFolder}/subprojects",
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "${workspaceFolder}/tlspack_socket"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",

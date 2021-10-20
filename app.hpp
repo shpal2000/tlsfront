@@ -39,16 +39,8 @@ enum enum_tls_version { sslv3=0
                             , tls1_3
                             , tls_all};
 
-struct tlsf_stats : public ev_sockstats
+struct app_stats : public ev_sockstats
 {
-    uint64_t sslResumptionInit;
-    uint64_t sslResumptionInitHit;
-    uint64_t sslResumptionInitMiss;
-
-    uint64_t sslResumptionRecv;
-    uint64_t sslResumptionRecvHit;
-    uint64_t sslResumptionRecvMiss;
-
     static void dump_json_ev_sockstats (json& j, ev_sockstats* stats)
     {
         j["socketCreate"] = stats->socketCreate;
@@ -118,30 +110,36 @@ struct tlsf_stats : public ev_sockstats
     virtual void dump_json (json& j)
     {
         dump_json_ev_sockstats (j, this);
-
-        j["sslResumptionInit"] = sslResumptionInit;
-        j["sslResumptionInitHit"] = sslResumptionInitHit;
-        j["sslResumptionInitMiss"] = sslResumptionInitMiss;
-
-        j["sslResumptionRecv"] = sslResumptionRecv;
-        j["sslResumptionRecvHit"] = sslResumptionRecvHit;
-        j["sslResumptionRecvMiss"] = sslResumptionRecvMiss;
-
     };
 
 };
 
+class app : public ev_app
+{
+public:
+    app(json cfg_json, app_stats* group_stats);
 
+    virtual ~app()
+    {
+    }
+
+    virtual void run_iter(bool tick_sec)
+    {
+        ev_app::run_iter (tick_sec);
+    }
+};
+
+/*
 class tlsf_conn_grp
 {
 public:
     ev_socket_opt m_sock_opt;
     std::vector<ev_sockstats*> m_stats_arr;
-    tlsf_stats m_stats;
+    app_stats m_stats;
 
-    tlsf_stats* get_stats () {return &m_stats;}
+    app_stats* get_stats () {return &m_stats;}
     
-    tlsf_conn_grp (json jcfg, tlsf_stats* parent_stats) {
+    tlsf_conn_grp (json jcfg, app_stats* parent_stats) {
         m_sock_opt.rcv_buff_len = jcfg["tcp_rcv_buff"].get<uint32_t>();
         m_sock_opt.snd_buff_len = jcfg["tcp_snd_buff"].get<uint32_t>();
 
@@ -160,7 +158,7 @@ public:
 
     ev_sockaddr m_srvr_addr;
     
-    tlsf_cs_grp (json jcfg, tlsf_stats* parent_stats)
+    tlsf_cs_grp (json jcfg, app_stats* parent_stats)
                     : tlsf_conn_grp (jcfg, parent_stats)
     {
 
@@ -220,12 +218,12 @@ public:
     };
 };
 
-class tlsf_app : public ev_app
+class app : public ev_app
 {
 public:
-    tlsf_app(json cfg_json, tlsf_stats* group_stats);
+    app(json cfg_json, app_stats* group_stats);
 
-    virtual ~tlsf_app()
+    virtual ~app()
     {
     }
 
@@ -234,13 +232,13 @@ public:
         ev_app::run_iter (tick_sec);
     }
 
-    tlsf_stats* get_stats(){
+    app_stats* get_stats(){
         return &m_stats;
     }
 
 
 private:
-    tlsf_stats m_stats;
+    app_stats m_stats;
 
     ev_sockaddr m_server_addr;
     ev_sockaddr m_proxy_addr;
@@ -276,7 +274,7 @@ public:
 
 public:
     tlsf_session* m_session;
-    tlsf_app* m_app;
+    app* m_app;
 };
 
 class tlsf_session
@@ -315,3 +313,5 @@ public:
     std::queue<ev_buff*> m_client_rbuffs;
     std::queue<ev_buff*> m_server_rbuffs;
 };
+*/
+

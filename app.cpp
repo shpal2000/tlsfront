@@ -1,6 +1,7 @@
 
 #include "app.hpp"
 
+/*
 tlsf_app::tlsf_app(json jcfg
                 , tlsf_stats* group_stats)
 {
@@ -39,6 +40,7 @@ tlsf_app::tlsf_app(json jcfg
 
 
 }
+*/
 
 int main(int /*argc*/, char ** /*argv*/)
 {
