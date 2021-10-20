@@ -242,9 +242,12 @@ public:
 private:
     tlsf_stats m_stats;
 
-    std::vector<ev_sockaddrx*> m_clnt_addr_pool;
-    int m_clnt_addr_index = 0;
-    int m_clnt_addr_count = 0;
+    ev_sockaddr m_server_addr;
+    ev_sockaddr m_proxy_addr;
+    std::vector<ev_sockaddrx*> m_client_addr_pool;
+
+    int m_client_addr_index = 0;
+    int m_client_addr_count = 0;
 
 };
 
