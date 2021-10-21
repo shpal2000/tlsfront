@@ -647,23 +647,24 @@ int ev_socket::tcp_listen(epoll_ctx* epoll_ctxp
             set_state (STATE_TCP_SOCK_REUSE);
         }
 
+        int so_iptrans_status = 0;
         //???
-        so_op = 1;
-        int so_iptrans_status = setsockopt(m_fd
-                                        , SOL_IP
-                                        , IP_TRANSPARENT
-                                        , &so_op
-                                        , sizeof(int));
-        if (so_iptrans_status == -1)
-        {
-            inc_stats (socketIpTransparentSetFail);
-            set_error_state (STATE_TCP_TRANSPARENT_IP_FAIL);
-        }
-        else
-        {
-            inc_stats (socketIpTransparentSet);
-            set_state (STATE_TCP_SOCK_IP_TRANSPARENT);
-        }
+        // so_op = 1;
+        // so_iptrans_status = setsockopt(m_fd
+        //                                 , SOL_IP
+        //                                 , IP_TRANSPARENT
+        //                                 , &so_op
+        //                                 , sizeof(int));
+        // if (so_iptrans_status == -1)
+        // {
+        //     inc_stats (socketIpTransparentSetFail);
+        //     set_error_state (STATE_TCP_TRANSPARENT_IP_FAIL);
+        // }
+        // else
+        // {
+        //     inc_stats (socketIpTransparentSet);
+        //     set_state (STATE_TCP_SOCK_IP_TRANSPARENT);
+        // }
         
         if (so_reuse_status == 0 && so_iptrans_status == 0)
         {

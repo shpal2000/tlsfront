@@ -28,8 +28,29 @@ tlsfront_tcp_app::tlsfront_tcp_app(tlsfront_tcp_cfg* cfg, tlsfront_tcp_stats* gs
 
 }
 
+
 tlsfront_tcp_app::~tlsfront_tcp_app()
 {
 
 }
 
+
+void tlsfront_tcp_app::run_iter(bool tick_sec)
+{
+    ev_app::run_iter (tick_sec);
+
+    if (tick_sec)
+    {
+        m_stats.tick_sec();
+    }
+}
+
+ev_socket* tlsfront_tcp_app::alloc_socket()
+{
+    return new tlsfront_tcp_socket();
+}
+
+void tlsfront_tcp_app::free_socket(ev_socket* ev_sock)
+{
+    delete ev_sock;
+}

@@ -1,8 +1,9 @@
 #ifndef __TLSFRONT_TCP_SOCKET__H
 #define __TLSFRONT_TCP_SOCKET__H
 
+#include "tlsfront_tcp_app.hpp"
+
 class tlsfront_tcp_session;
-class tlsfront_tcp_app;
 
 class tlsfront_tcp_socket : public ev_socket
 {
