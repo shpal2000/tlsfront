@@ -354,6 +354,7 @@ private:
     ev_socket* m_parent;
 
     ev_socket_opt* m_sock_opt;
+    ev_app* m_app;
 
 public:
     ev_socket* m_next;
@@ -375,6 +376,8 @@ public:
 
     ev_socket* get_parent () {return m_parent;};
 
+    void init ();
+    
     void set_portq (ev_portq* portq)
     {
         m_portq = portq;
@@ -475,7 +478,6 @@ public:
     }
 
 private:
-    void init ();
     void set_ssl (SSL* ssl)
     {
         m_ssl = ssl;

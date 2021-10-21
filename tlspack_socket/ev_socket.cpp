@@ -27,6 +27,7 @@ void ev_socket::init ()
     m_parent = nullptr;
     m_next = nullptr;
     m_prev = nullptr;
+    m_app = nullptr;
 }
 
 ev_socket::ev_socket()
@@ -64,7 +65,7 @@ ev_socket* ev_socket::new_tcp_connect (epoll_ctx* epoll_ctxp
     ev_socket* new_sock = epoll_ctxp->m_app->alloc_socket ();
 
     if (new_sock) {
-        new_sock->init ();
+        new_sock->m_app = epoll_ctxp->m_app;
         new_sock->set_sockstats_arr (statsArr);
         new_sock->set_socket_opt (ev_sock_opt);
         epoll_ctxp->m_app->add_to_active_list (new_sock);
@@ -90,6 +91,7 @@ ev_socket* ev_socket::new_tcp_listen (epoll_ctx* epoll_ctxp
     ev_socket* new_sock = epoll_ctxp->m_app->alloc_socket ();
 
     if (new_sock) {
+        new_sock->m_app = epoll_ctxp->m_app;
         new_sock->set_sockstats_arr (statsArr);
         new_sock->set_socket_opt (ev_sock_opt);
         epoll_ctxp->m_app->add_to_active_list (new_sock);
@@ -1050,7 +1052,7 @@ void ev_socket::handle_tcp_accept ()
     if (ev_sock_ptr == nullptr) {
         inc_stats (tcpConnStructNotAvail);
     } else {
-        ev_sock_ptr->init ();
+        ev_sock_ptr->m_app = m_epoll_ctx->m_app;
         ev_sock_ptr->set_sockstats_arr ( get_sockstats_arr() );
         ev_sock_ptr->set_socket_opt ( get_socket_opt() );
         m_epoll_ctx->m_app->add_to_active_list (ev_sock_ptr);

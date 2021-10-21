@@ -1,3 +1,6 @@
+#ifndef __TLSFRONT_APP__H
+#define __TLSFRONT_APP__H
+
 #include "ev_app.hpp"
 
 #include <stdint.h>
@@ -317,4 +320,4 @@ public:
     std::queue<ev_buff*> m_server_rbuffs;
 };
 */
-
+#endif

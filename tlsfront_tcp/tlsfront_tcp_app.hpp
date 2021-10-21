@@ -1,3 +1,6 @@
+#ifndef __TLSFRONT_TCP_APP__H
+#define __TLSFRONT_TCP_APP__H
+
 #include "app.hpp"
 
 struct tlsfront_tcp_stats_data : app_stats
@@ -23,10 +26,31 @@ struct tlsfront_tcp_stats : tlsfront_tcp_stats_data
 };
 
 
+struct tlsfront_tcp_cfg
+{
+    std::string front_ip;
+    u_short front_port;
+
+    std::string back_ip;
+    u_short back_port;
+
+};
+
+
 class tlsfront_tcp_app : public app
 {
 public:
-    tlsfront_tcp_app(json cfgj, tlsfront_tcp_stats* gstats);
+    tlsfront_tcp_app(tlsfront_tcp_cfg* cfg, tlsfront_tcp_stats* gstats);
 
     virtual ~tlsfront_tcp_app();
+
+private:
+    ev_sockaddr m_front_addr;
+    ev_sockaddr m_back_addr;
+    ev_socket_opt m_sock_opt;
+    tlsfront_tcp_stats m_stats;
+    std::vector<ev_sockstats*> m_stats_arr;
+
+    tlsfront_tcp_socket* m_front_lsocket;
 };
+#endif
