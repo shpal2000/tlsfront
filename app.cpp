@@ -1,48 +1,38 @@
 
 #include "app.hpp"
 
-/*
-tlsf_app::tlsf_app(json jcfg
-                , tlsf_stats* group_stats)
+void app::RunLoop(std::vector<app*> *app_list
+                    , std::vector<app_stats*> *stats_list)
 {
-    //m_group_stats = group_stats;
-    
-    auto proxy_ip = jcfg["proxy_ip"].get<std::string>();
-    auto proxy_port = jcfg["proxy_port"].get<u_short>();
-
-    auto server_ip = jcfg["server_ip"].get<std::string>();
-    auto server_port = jcfg["server_port"].get<u_short>();
-
-    auto client_ip_list = jcfg["client_ips"];
-
-    ev_socket::set_sockaddr (&m_proxy_addr, server_ip.c_str(), htons(server_port));
-
-    ev_socket::set_sockaddr (&m_server_addr, server_ip.c_str(), htons(server_port));
-
-    u_short port_begin = 10000;
-    u_short port_end = 60000;
-
-    m_client_addr_index = 0;
-    m_client_addr_count = 0;
-
-    for (auto it = client_ip_list.begin(); it != client_ip_list.end(); ++it)
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+    bool is_tick_sec = false;
+    while (true)
     {
-        auto client_ip = it.value().get<std::string>();
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
 
-        char next_ip[128];
-        strcpy (next_ip, client_ip.c_str());
+        auto ms_elapsed 
+                = std::chrono::duration_cast<std::chrono::milliseconds> (end-start);
 
-        ev_sockaddrx* next_addr = new ev_sockaddrx (port_begin, port_end);
-        ev_socket::set_sockaddr (&next_addr->m_addr, next_ip, 0);
-        m_client_addr_pool.push_back(next_addr);
-        m_client_addr_count++;
+        if (ms_elapsed.count() >= 1000)
+        {
+            start = end;
+            is_tick_sec = true;
+        }
+
+        for (app* app_ptr : *app_list)
+        {
+            app_ptr->run_iter (is_tick_sec);
+        }
+
+        if (is_tick_sec) 
+        {
+            for (app_stats* stats_ptr : *stats_list)
+            {
+                stats_ptr->tick_sec();
+            }
+
+            is_tick_sec = false;
+        }
     }
-
-
-}
-*/
-
-int main(int /*argc*/, char ** /*argv*/)
-{
-    return 0;
 }
