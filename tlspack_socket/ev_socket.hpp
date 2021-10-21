@@ -799,4 +799,69 @@ public:
     int m_data_len;
     int m_data_offset;
 };
+
+#define SET_JSON_EV_SOCKSTATS(__j,__stats); \
+__j["socketCreate"] = __stats->socketCreate; \
+__j["socketCreateFail"] = __stats->socketCreateFail; \
+__j["socketListenFail"] = __stats->socketListenFail; \
+__j["socketReuseSet"] = __stats->socketReuseSet; \
+__j["socketReuseSetFail"] = __stats->socketReuseSetFail; \
+__j["socketIpTransparentSet"] = __stats->socketIpTransparentSet; \
+__j["socketIpTransparentSetFail"] = __stats->socketIpTransparentSetFail; \
+__j["socketLingerSet"] = __stats->socketLingerSet; \
+__j["socketLingerSetFail"] = __stats->socketLingerSetFail; \
+__j["socketBindIpv4"] = __stats->socketBindIpv4; \
+__j["socketBindIpv4Fail"] = __stats->socketBindIpv4Fail; \
+__j["socketBindIpv6"] = __stats->socketBindIpv6; \
+__j["socketBindIpv6Fail"] = __stats->socketBindIpv6Fail; \
+ \
+__j["socketConnectEstablishFail"] = __stats->socketConnectEstablishFail; \
+__j["socketConnectEstablishFail2"] = __stats->socketConnectEstablishFail2; \
+ \
+__j["tcpConnInit"] = __stats->tcpConnInit; \
+__j["tcpConnInitInUse"] = __stats->tcpConnInitInUse; \
+__j["tcpConnInitInSec"] = __stats->tcpConnInitInSec; \
+__j["tcpConnInitRate"] = __stats->tcpConnInitRate; \
+__j["tcpConnInitSuccess"] = __stats->tcpConnInitSuccess; \
+__j["tcpConnInitSuccessInSec"] = __stats->tcpConnInitSuccessInSec; \
+__j["tcpConnInitSuccessRate"] = __stats->tcpConnInitSuccessRate; \
+__j["tcpConnInitFail"] = __stats->tcpConnInitFail; \
+__j["tcpConnInitFailImmediateEaddrNotAvail"] = __stats->tcpConnInitFailImmediateEaddrNotAvail; \
+__j["tcpConnInitFailImmediateOther"] = __stats->tcpConnInitFailImmediateOther; \
+__j["tcpConnInitProgress"] = __stats->tcpConnInitProgress; \
+__j["tcpWriteFail"] = __stats->tcpWriteFail; \
+__j["tcpWriteReturnsZero"] = __stats->tcpWriteReturnsZero; \
+__j["tcpReadFail"] = __stats->tcpReadFail; \
+ \
+__j["tcpListenStart"] = __stats->tcpListenStart; \
+__j["tcpListenStop"] = __stats->tcpListenStop; \
+__j["tcpListenStartFail"] = __stats->tcpListenStartFail; \
+__j["tcpAcceptFail"] = __stats->tcpAcceptFail; \
+__j["tcpAcceptSuccess"] = __stats->tcpAcceptSuccess; \
+__j["tcpAcceptSuccessInSec"] = __stats->tcpAcceptSuccessInSec; \
+__j["tcpAcceptSuccessRate"] = __stats->tcpAcceptSuccessRate; \
+ \
+__j["tcpLocalPortAssignFail"] = __stats->tcpLocalPortAssignFail; \
+__j["tcpPollRegUnregFail"] = __stats->tcpPollRegUnregFail; \
+ \
+__j["sslConnInit"] = __stats->sslConnInit; \
+__j["sslConnInitInSec"] = __stats->sslConnInitInSec; \
+__j["sslConnInitRate"] = __stats->sslConnInitRate; \
+__j["sslConnInitSuccess"] = __stats->sslConnInitSuccess; \
+__j["sslConnInitSuccessInSec"] = __stats->sslConnInitSuccessInSec; \
+__j["sslConnInitSuccessRate"] = __stats->sslConnInitSuccessRate; \
+__j["sslConnInitFail"] = __stats->sslConnInitFail; \
+__j["sslConnInitProgress"] = __stats->sslConnInitProgress; \
+__j["sslAcceptSuccess"] = __stats->sslAcceptSuccess; \
+__j["sslAcceptSuccessInSec"] = __stats->sslAcceptSuccessInSec; \
+__j["sslAcceptSuccessRate"] = __stats->sslAcceptSuccessRate; \
+ \
+__j["tcpConnStructNotAvail"] = __stats->tcpConnStructNotAvail; \
+__j["tcpListenStructNotAvail"] = __stats->tcpListenStructNotAvail; \
+__j["appSessStructNotAvail"] = __stats->appSessStructNotAvail; \
+__j["tcpInitServerFail"] = __stats->tcpInitServerFail; \
+__j["tcpGetSockNameFail"] = __stats->tcpGetSockNameFail; \
+ \
+__j["tcpActiveConns"] = __stats->tcpActiveConns;
+
 #endif

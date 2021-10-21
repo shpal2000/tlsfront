@@ -8,6 +8,7 @@ nlohmann_json_proj = subproject('json')
 nlohmann_json_dep = nlohmann_json_proj.get_variable('nlohmann_json_dep')
 
 subdir ('tlspack_socket')
+subdir ('tlspack_app')
 subdir ('tlsfront_tcp')
 
 

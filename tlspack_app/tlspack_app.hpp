@@ -1,5 +1,5 @@
-#ifndef __TLSFRONT_APP__H
-#define __TLSFRONT_APP__H
+#ifndef __TLSPACK_APP__H
+#define __TLSPACK_APP__H
 
 #include "ev_app.hpp"
 
