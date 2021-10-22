@@ -4,12 +4,30 @@
 tlsfront_tcp_socket::tlsfront_tcp_socket()
 {
     m_session = nullptr;
-    m_pair = nullptr;
+    m_other_socket = nullptr;
+    m_read_buff = nullptr;
+    m_write_buff = nullptr;
 }
 
 tlsfront_tcp_socket::~tlsfront_tcp_socket()
 {
+    if (m_read_buff)
+    {
+        ev_buff::free_ev_buff(m_read_buff);
+        m_read_buff = nullptr;
+    }
 
+    if (m_write_buff)
+    {
+        ev_buff::free_ev_buff(m_write_buff);
+        m_write_buff = nullptr;
+    }
+
+    while (!m_write_buff_list.empty())
+    {
+        ev_buff::free_ev_buff(m_write_buff_list.front());
+        m_write_buff_list.pop();
+    }
 }
 
 void tlsfront_tcp_socket::on_establish ()
@@ -34,11 +52,11 @@ void tlsfront_tcp_socket::on_establish ()
                 server_socket->m_session = new_sess;
                 client_socket->m_session = new_sess;
 
-                m_session->m_server_sock = server_socket;
-                m_session->m_client_sock = client_socket;
+                m_session->m_front_socket = server_socket;
+                m_session->m_back_socket = client_socket;
 
-                server_socket->m_pair = client_socket;
-                client_socket->m_pair = server_socket;
+                server_socket->m_other_socket = client_socket;
+                client_socket->m_other_socket = server_socket;
             }
             else
             {
@@ -62,20 +80,44 @@ void tlsfront_tcp_socket::on_establish ()
 
 void tlsfront_tcp_socket::on_write ()
 {
-    printf("on_establish");
+    if (!m_write_buff_list.empty())
+    {
+        m_write_buff = m_write_buff_list.front();
+        m_write_buff_list.pop();
+
+        write_next_data (m_write_buff->m_buff
+                            , 0
+                            , m_write_buff->m_data_len
+                            , false);
+    }
 }
 
-void tlsfront_tcp_socket::on_wstatus (int /*bytes_written*/, int /*write_status*/)
+void tlsfront_tcp_socket::on_wstatus (int /*bytes_written*/, int write_status)
 {
-    printf("on_establish");
+    ev_buff::free_ev_buff(m_write_buff);
+    m_write_buff = nullptr;
+
+    if (write_status == WRITE_STATUS_NORMAL)
+    {
+        //todo ???
+    }
+    else
+    {
+        //todo ??
+    }
 }
 
 void tlsfront_tcp_socket::on_read ()
 {
-    ev_buff* rd_buff = new ev_buff(2048);
-    if (rd_buff && rd_buff->m_buff)
+    ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
+
+    if (rd_buff)
     {
-        read_next_data (rd_buff->m_buff, 0, rd_buff->m_buff_len, true);
+        m_read_buff = rd_buff;
+        read_next_data (rd_buff->m_buff
+                        , 0
+                        , rd_buff->m_buff_len
+                        , true);
     }
     else
     {
@@ -91,18 +133,46 @@ void tlsfront_tcp_socket::on_rstatus (int bytes_read, int read_status)
         {
             if (read_status == READ_STATUS_TCP_CLOSE) 
             {
-                m_pair->write_close();
+                m_other_socket->write_close();
             }
             else
             {
                 this->abort();
-                m_pair->abort();
+                m_other_socket->abort();
             }
         }
+        else
+        {
+            if (read_status == READ_STATUS_TCP_CLOSE) 
+            {
+                this->write_close();
+            }
+            else
+            {
+                this->abort();
+            }
+        }
+
+        ev_buff::free_ev_buff(m_read_buff);
+        m_read_buff = nullptr;
+    }
+    else
+    {
+        m_read_buff->m_data_len = bytes_read;
+        m_other_socket->m_write_buff_list.push(m_read_buff);
+        m_read_buff = nullptr;
     }
 }
 
 void tlsfront_tcp_socket::on_finish ()
 {
-    printf("on_finish");
+    if (m_session)
+    {
+        if (!m_other_socket->m_session)
+        {
+            delete m_session;
+        }
+
+        m_session = nullptr;
+    }
 }

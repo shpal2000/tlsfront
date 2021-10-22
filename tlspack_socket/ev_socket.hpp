@@ -798,6 +798,25 @@ public:
     int m_buff_len;
     int m_data_len;
     int m_data_offset;
+
+    static ev_buff* alloc_ev_buff (int buff_len)
+    {
+        ev_buff* b = new ev_buff(buff_len);
+
+        if (b && !b->m_buff)
+        {
+            delete b;
+            b = nullptr;
+        }
+
+        return b;
+    }
+
+    static void free_ev_buff (ev_buff* b)
+    {
+        delete b;
+    }
+
 };
 
 #define SET_JSON_EV_SOCKSTATS(__j,__stats); \

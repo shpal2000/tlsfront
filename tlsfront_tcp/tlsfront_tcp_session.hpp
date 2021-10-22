@@ -13,18 +13,18 @@ public:
     ~tlsfront_tcp_session();
     
 public:
-    tlsfront_tcp_socket* m_server_sock;
-    tlsfront_tcp_socket* m_client_sock;
+    tlsfront_tcp_socket* m_front_socket;
+    tlsfront_tcp_socket* m_back_socket;
     bool m_session_established;
 
-    ev_buff* m_client_current_wbuff;
-    ev_buff* m_server_current_wbuff;
+    ev_buff* m_back_cwbuff;
+    ev_buff* m_front_cwbuff;
 
-    ev_buff* m_client_current_rbuff;
-    ev_buff* m_server_current_rbuff;
+    ev_buff* m_back_crbuff;
+    ev_buff* m_front_crbuff;
     
-    std::queue<ev_buff*> m_client_rbuffs;
-    std::queue<ev_buff*> m_server_rbuffs;
+    std::queue<ev_buff*> m_back_rbuffs;
+    std::queue<ev_buff*> m_front_rbuffs;
 };
 
 #endif

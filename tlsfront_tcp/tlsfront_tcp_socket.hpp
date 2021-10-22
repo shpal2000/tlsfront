@@ -20,7 +20,14 @@ public:
 
 public:
     tlsfront_tcp_session* m_session;
-    tlsfront_tcp_socket* m_pair;
+
+    tlsfront_tcp_socket* m_other_socket;
+
+    ev_buff* m_read_buff;
+    ev_buff* m_write_buff;
+
+    std::queue<ev_buff*> m_write_buff_list;
+
 };
 
 #endif

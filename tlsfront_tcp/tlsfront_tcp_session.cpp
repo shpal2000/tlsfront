@@ -2,15 +2,15 @@
 
 tlsfront_tcp_session::tlsfront_tcp_session()
 {
-    m_server_sock = nullptr;
-    m_client_sock = nullptr;
+    m_front_socket = nullptr;
+    m_back_socket = nullptr;
     m_session_established = false;
 
-    m_client_current_wbuff = nullptr;
-    m_server_current_wbuff = nullptr;
+    m_back_cwbuff = nullptr;
+    m_front_cwbuff = nullptr;
 
-    m_client_current_rbuff = nullptr;
-    m_server_current_rbuff = nullptr;
+    m_back_crbuff = nullptr;
+    m_front_crbuff = nullptr;
 }
 
 tlsfront_tcp_session::~tlsfront_tcp_session()

@@ -1240,7 +1240,7 @@ void ev_socket::do_read_next_data ()
             {
                 notifyReadStatus = true;
                 m_read_status = READ_STATUS_TCP_CLOSE;
-                disable_rd_notification ();
+                //disable_rd_notification ();
             } 
             else
             {
@@ -1392,7 +1392,7 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                     if ( (events & EPOLLIN) 
                             && (sockp->is_fd_closed() == false) )
                     {
-                        if (sockp->is_set_state(STATE_TCP_REMOTE_CLOSED) == 0)
+                        // if (sockp->is_set_state(STATE_TCP_REMOTE_CLOSED) == 0)
                         {
                             if (sockp->is_set_state(STATE_CONN_READ_PENDING) 
                                 == 0)
@@ -1406,6 +1406,10 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                                 sockp->do_read_next_data ();
                             }
                         }
+                        // else
+                        // {
+                        //     printf ("here");
+                        // }
                     }
                     //handle write
                     if ( (events & EPOLLOUT) 

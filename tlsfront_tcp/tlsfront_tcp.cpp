@@ -1,9 +1,12 @@
 
 #include "tlsfront_tcp_app.hpp"
 
+#include <signal.h>
 
 int main(int /*argc*/, char ** /*argv*/)
 {
+    signal(SIGPIPE, SIG_IGN);
+
     std::vector<tlspack_app*> app_list;
     std::vector<tlspack_app_stats*> stats_list;
 
