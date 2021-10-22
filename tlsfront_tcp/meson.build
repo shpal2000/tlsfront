@@ -6,7 +6,7 @@ executable('tlsfront_tcp.exe'
             , sources : [ 'tlsfront_tcp_socket.cpp'
                             , 'tlsfront_tcp_session.cpp'
                             , 'tlsfront_tcp_app.cpp'
-                            , 'main.cpp']
+                            , 'tlsfront_tcp.cpp']
             , dependencies: [openssl, nlohmann_json_dep]
             , include_directories : [incdirs]
             , link_with : [ev_socklib, tlspack_applib]
