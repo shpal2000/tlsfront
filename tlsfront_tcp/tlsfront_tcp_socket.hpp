@@ -20,7 +20,6 @@ public:
 
 public:
     tlsfront_tcp_session* m_session;
-    tlsfront_tcp_app* m_app;
 };
 
 #endif

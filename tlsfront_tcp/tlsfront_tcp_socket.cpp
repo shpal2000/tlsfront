@@ -1,19 +1,56 @@
 #include "tlsfront_tcp_socket.hpp"
+#include "tlsfront_tcp_session.hpp"
 
 tlsfront_tcp_socket::tlsfront_tcp_socket()
 {
-    m_app = nullptr;
     m_session = nullptr;
 }
 
 tlsfront_tcp_socket::~tlsfront_tcp_socket()
 {
-    printf("on_establish");
+
 }
 
 void tlsfront_tcp_socket::on_establish ()
 {
-    printf("on_establish");
+    tlsfront_tcp_app* app = (tlsfront_tcp_app*) this->m_app;
+
+    if (m_session == nullptr)
+    {
+        tlsfront_tcp_socket* server_socket = this;
+        tlsfront_tcp_session* new_sess = new tlsfront_tcp_session();
+
+        if (new_sess)
+        {
+            tlsfront_tcp_socket* client_socket 
+             = (tlsfront_tcp_socket*) app->new_tcp_connect (&app->m_local_addr
+                                                            , &app->m_back_addr
+                                                            , &app->m_stats_arr
+                                                            , NULL
+                                                            , &app->m_sock_opt);
+            if (client_socket)
+            {
+                client_socket->m_session = new_sess;
+                server_socket->m_session = new_sess;
+            }
+            else
+            {
+                delete new_sess;
+                server_socket->abort();
+                //stats ???
+            }
+        }
+        else
+        {
+                server_socket->abort();
+                //stats ???
+        }
+
+    } 
+    else
+    {
+        m_session->m_session_established = true;
+    } 
 }
 
 void tlsfront_tcp_socket::on_write ()

@@ -367,7 +367,13 @@ int ev_socket::tcp_connect (epoll_ctx* epoll_ctxp
 
     //socket contexts
     m_epoll_ctx = epoll_ctxp;
-    std::memcpy (&m_local_addr, localAddress, sizeof (ev_sockaddr));
+    if (localAddress)
+    {
+        std::memcpy (&m_local_addr, localAddress, sizeof (ev_sockaddr));
+    }
+    else{
+        std::memset(&m_local_addr, 0, sizeof (ev_sockaddr));
+    }
     std::memcpy (&m_remote_addr, remoteAddress, sizeof (ev_sockaddr));
 
     //socket if ipv6
@@ -452,22 +458,23 @@ int ev_socket::tcp_connect (epoll_ctx* epoll_ctxp
         }
 
         //???
-        so_op = 1;
-        int so_iptrans_status = setsockopt(m_fd
-                                        , SOL_IP
-                                        , IP_TRANSPARENT
-                                        , &so_op
-                                        , sizeof(int));
-        if (so_iptrans_status == -1)
-        {
-            inc_stats (socketIpTransparentSetFail);
-            set_error_state (STATE_TCP_TRANSPARENT_IP_FAIL);
-        }
-        else
-        {
-            inc_stats (socketIpTransparentSet);
-            set_state (STATE_TCP_SOCK_IP_TRANSPARENT);
-        }
+        int so_iptrans_status = 0;
+        // so_op = 1;
+        // int so_iptrans_status = setsockopt(m_fd
+        //                                 , SOL_IP
+        //                                 , IP_TRANSPARENT
+        //                                 , &so_op
+        //                                 , sizeof(int));
+        // if (so_iptrans_status == -1)
+        // {
+        //     inc_stats (socketIpTransparentSetFail);
+        //     set_error_state (STATE_TCP_TRANSPARENT_IP_FAIL);
+        // }
+        // else
+        // {
+        //     inc_stats (socketIpTransparentSet);
+        //     set_state (STATE_TCP_SOCK_IP_TRANSPARENT);
+        // }
 
         if (so_reuse_status == 0 && so_iptrans_status == 0)
         {

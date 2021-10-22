@@ -22,13 +22,15 @@ public:
     
     void free_socket(ev_socket* ev_sock);
 
-private:
     ev_sockaddr m_front_addr;
     ev_sockaddr m_back_addr;
+    ev_sockaddr m_local_addr;
     ev_socket_opt m_sock_opt;
     tlsfront_tcp_stats m_stats;
     std::vector<ev_sockstats*> m_stats_arr;
 
     tlsfront_tcp_socket* m_front_lsocket;
 };
+
+
 #endif

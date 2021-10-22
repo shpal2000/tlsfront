@@ -354,12 +354,12 @@ private:
     ev_socket* m_parent;
 
     ev_socket_opt* m_sock_opt;
-    ev_app* m_app;
+    
 
 public:
     ev_socket* m_next;
     ev_socket* m_prev;
-
+    ev_app* m_app;
 
 public:
     ev_socket();

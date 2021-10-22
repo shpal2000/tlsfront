@@ -12,7 +12,11 @@ tlsfront_tcp_app::tlsfront_tcp_app(tlsfront_tcp_cfg* cfg, tlsfront_tcp_stats* gs
     ev_socket::set_sockaddr (&m_back_addr
                             , cfg->back_ip.c_str()
                             , htons(cfg->back_port));
-    
+
+    ev_socket::set_sockaddr (&m_local_addr
+                            , cfg->front_ip.c_str()
+                            , 0);
+
     m_sock_opt.rcv_buff_len = 0;
     m_sock_opt.snd_buff_len = 0;
 
