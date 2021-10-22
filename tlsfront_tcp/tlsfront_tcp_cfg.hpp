@@ -2,7 +2,7 @@
 #ifndef __TLSFRONT_TCP_CFG__H
 #define __TLSFRONT_TCP_CFG__H
 
-#include "app.hpp"
+#include "tlspack_app.hpp"
 
 struct tlsfront_tcp_cfg
 {

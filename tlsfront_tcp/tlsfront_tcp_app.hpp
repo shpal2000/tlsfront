@@ -1,7 +1,7 @@
 #ifndef __TLSFRONT_TCP_APP__H
 #define __TLSFRONT_TCP_APP__H
 
-#include "app.hpp"
+#include "tlspack_app.hpp"
 
 #include "tlsfront_tcp_cfg.hpp"
 #include "tlsfront_tcp_stats.hpp"
