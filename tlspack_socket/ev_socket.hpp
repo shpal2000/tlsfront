@@ -72,7 +72,7 @@ struct ev_socket_opt {
 #define STATE_SSL_TO_SEND_SHUTDOWN                      0x0000000001000000
 #define STATE_SSL_TO_SEND_RECEIVE_SHUTDOWN              0x0000000002000000
 #define STATE_NO_MORE_WRITE_DATA                        0x0000000004000000
-#define STATE_TCP_TO_SEND_FIN                           0x0000000008000000
+#define _STATE_TCP_TO_SEND_FIN                           0x0000000008000000
 #define STATE_TCP_TO_SEND_RST                           0x0000000010000000
 #define STATE_TCP_SENT_FIN                              0x0000000020000000
 #define STATE_TCP_SENT_RESET                            0x0000000040000000

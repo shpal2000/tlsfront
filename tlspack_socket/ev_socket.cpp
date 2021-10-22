@@ -338,7 +338,7 @@ void ev_socket::write_close (int send_close_notify) {
     } 
     else 
     {
-        set_state (STATE_NO_MORE_WRITE_DATA | STATE_TCP_TO_SEND_FIN);
+        set_state (STATE_NO_MORE_WRITE_DATA);
 
         if (send_close_notify == SSL_SEND_CLOSE_NOTIFY) {
             set_state (STATE_SSL_TO_SEND_SHUTDOWN);
@@ -1392,31 +1392,22 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                     if ( (events & EPOLLIN) 
                             && (sockp->is_fd_closed() == false) )
                     {
-                        // if (sockp->is_set_state(STATE_TCP_REMOTE_CLOSED) == 0)
+                        if (sockp->is_set_state(STATE_CONN_READ_PENDING)== 0)
                         {
-                            if (sockp->is_set_state(STATE_CONN_READ_PENDING) 
-                                == 0)
-                            {
-                                sockp->on_read();
-                            }
-
-                            if (sockp->is_set_state(STATE_CONN_READ_PENDING)
-                                && (sockp->is_fd_closed() == false))
-                            {
-                                sockp->do_read_next_data ();
-                            }
+                            sockp->on_read();
                         }
-                        // else
-                        // {
-                        //     printf ("here");
-                        // }
+
+                        if (sockp->is_set_state(STATE_CONN_READ_PENDING)
+                            && (sockp->is_fd_closed() == false))
+                        {
+                            sockp->do_read_next_data ();
+                        }
                     }
                     //handle write
                     if ( (events & EPOLLOUT) 
                             && (sockp->is_fd_closed() == false) )
                     {
-                        if (sockp->is_set_state(STATE_CONN_WRITE_PENDING) 
-                            == 0)
+                        if (sockp->is_set_state(STATE_CONN_WRITE_PENDING) == 0)
                         {
                             if (sockp->is_set_state(STATE_NO_MORE_WRITE_DATA))
                             {
