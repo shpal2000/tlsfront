@@ -4,8 +4,8 @@
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    std::vector<app*> app_list;
-    std::vector<app_stats*> stats_list;
+    std::vector<tlspack_app*> app_list;
+    std::vector<tlspack_app_stats*> stats_list;
 
     tlsfront_tcp_cfg tcp_app_cfg;
     tlsfront_tcp_stats tcp_app_gstats;
@@ -16,13 +16,14 @@ int main(int /*argc*/, char ** /*argv*/)
     tcp_app_cfg.back_port = 80;
 
     
-    tlsfront_tcp_app* tcpApp = new tlsfront_tcp_app(&tcp_app_cfg, &tcp_app_gstats);
+    tlsfront_tcp_app* tcpApp 
+        = new tlsfront_tcp_app(&tcp_app_cfg, &tcp_app_gstats);
 
     app_list.push_back(tcpApp);
     stats_list.push_back(&tcp_app_gstats);
 
 
-    app::RunLoop(&app_list, &stats_list);
+    tlspack_app::RunLoop(&app_list, &stats_list);
     
 
     return 0;

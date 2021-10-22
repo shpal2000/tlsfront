@@ -7,6 +7,7 @@ incdirs = include_directories(['../tlspack_socket/', '../subprojects/'])
 tlspack_applib = shared_library('tlspack_app'
                             , sources : ['tlspack_app.cpp']
                             , dependencies: [openssl, nlohmann_json_dep]
+                            , link_with : [ev_socklib]
                             , include_directories : [incdirs]
                             , install_rpath : '/rundir/lib'
                             , install_dir : '/srcdir/imgdir/'

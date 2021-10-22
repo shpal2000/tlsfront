@@ -37,7 +37,7 @@ tlsfront_tcp_app::~tlsfront_tcp_app()
 
 void tlsfront_tcp_app::run_iter(bool tick_sec)
 {
-    ev_app::run_iter (tick_sec);
+    tlspack_app::run_iter (tick_sec);
 
     if (tick_sec)
     {

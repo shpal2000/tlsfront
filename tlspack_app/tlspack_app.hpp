@@ -42,7 +42,7 @@ enum enum_tls_version { sslv3=0
                             , tls1_3
                             , tls_all};
 
-struct app_stats : public ev_sockstats
+struct tlspack_app_stats : public ev_sockstats
 {
     static void dump_json_ev_sockstats (json& j, ev_sockstats* stats)
     {
@@ -56,25 +56,17 @@ struct app_stats : public ev_sockstats
 
 };
 
-class app : public ev_app
+class tlspack_app : public ev_app
 {
 public:
-    app()
-    {
-        
-    }
+    tlspack_app();
 
-    virtual ~app()
-    {
-    }
+    virtual ~tlspack_app();
 
-    virtual void run_iter(bool tick_sec)
-    {
-        ev_app::run_iter (tick_sec);
-    }
+    virtual void run_iter(bool tick_sec);
 
-    static void RunLoop(std::vector<app*> *app_list
-                        , std::vector<app_stats*> *stats_list);
+    static void RunLoop(std::vector<tlspack_app*> *app_list
+                        , std::vector<tlspack_app_stats*> *stats_list);
 };
 
 #endif

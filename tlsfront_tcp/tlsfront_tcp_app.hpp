@@ -9,7 +9,7 @@
 class tlsfront_tcp_socket;
 
 
-class tlsfront_tcp_app : public app
+class tlsfront_tcp_app : public tlspack_app
 {
 public:
     tlsfront_tcp_app(tlsfront_tcp_cfg* cfg, tlsfront_tcp_stats* gstats);
