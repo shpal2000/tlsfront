@@ -4,6 +4,7 @@
 tlsfront_tcp_socket::tlsfront_tcp_socket()
 {
     m_session = nullptr;
+    m_pair = nullptr;
 }
 
 tlsfront_tcp_socket::~tlsfront_tcp_socket()
@@ -30,8 +31,14 @@ void tlsfront_tcp_socket::on_establish ()
                                                             , &app->m_sock_opt);
             if (client_socket)
             {
-                client_socket->m_session = new_sess;
                 server_socket->m_session = new_sess;
+                client_socket->m_session = new_sess;
+
+                m_session->m_server_sock = server_socket;
+                m_session->m_client_sock = client_socket;
+
+                server_socket->m_pair = client_socket;
+                client_socket->m_pair = server_socket;
             }
             else
             {
@@ -80,18 +87,22 @@ void tlsfront_tcp_socket::on_rstatus (int bytes_read, int read_status)
 {
     if (bytes_read == 0)
     {
+        if (m_session && m_session->m_session_established)
+        {
             if (read_status == READ_STATUS_TCP_CLOSE) 
             {
-                this->write_close();
+                m_pair->write_close();
             }
             else
             {
                 this->abort();
+                m_pair->abort();
             }
+        }
     }
 }
 
 void tlsfront_tcp_socket::on_finish ()
 {
-    printf("on_establish");
+    printf("on_finish");
 }

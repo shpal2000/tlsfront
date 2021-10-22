@@ -20,6 +20,7 @@ public:
 
 public:
     tlsfront_tcp_session* m_session;
+    tlsfront_tcp_socket* m_pair;
 };
 
 #endif
