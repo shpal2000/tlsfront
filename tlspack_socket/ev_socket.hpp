@@ -493,6 +493,11 @@ private:
         do_ssl_handshake ();
     }
 
+    void enable_rd_only_notification ();
+    void enable_rd_wr_notification ();
+    void disable_rd_wr_notification ();
+    void disable_wr_notification ();
+
 public:
 
     SSL* get_ssl () 
@@ -544,18 +549,6 @@ public:
                                         , int listenQLen
                                         , std::vector<ev_sockstats*>* statsArr
                                         , ev_socket_opt* ev_sock_opt);
-
-    void enable_rd_only_notification ();
-    void enable_wr_only_notification ();
-
-    void enable_rd_wr_notification ();
-    void disable_rd_wr_notification ();
-
-    void disable_wr_notification ();
-    void disable_rd_notification ();
-
-    void enable_wr_notification ();
-    void enable_rd_notification ();
 
     void read_next_data (char* readBuffer
                             , int readBuffOffset

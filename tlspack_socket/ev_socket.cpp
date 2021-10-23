@@ -128,31 +128,6 @@ void ev_socket::enable_rd_only_notification ()
     }
 }
 
-void ev_socket::enable_wr_only_notification () 
-{
-    if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) 
-            || is_set_state (STATE_TCP_POLL_WRITE_CURRENT) == 0 ) {
-
-        struct epoll_event setEvent;
-        setEvent.events = 0;
-        setEvent.data.ptr = this;
-        setEvent.events = EPOLLOUT;
-
-        if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) == 0 
-                && is_set_state (STATE_TCP_POLL_WRITE_CURRENT) == 0 ) 
-        {
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_ADD, m_fd, &setEvent);
-        } 
-        else 
-        {
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_MOD, m_fd, &setEvent);
-        }
-
-        clear_state (STATE_TCP_POLL_READ_CURRENT);
-        set_state (STATE_TCP_POLL_WRITE_CURRENT);
-    }
-}
-
 void ev_socket::enable_rd_wr_notification () 
 {
     if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) == 0 
@@ -212,74 +187,6 @@ void ev_socket::disable_wr_notification ()
     }
 }
 
-void ev_socket::disable_rd_notification ()
-{
-    if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) ) {
-
-        if ( is_set_state (STATE_TCP_POLL_WRITE_CURRENT) == 0 ) {
-
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_DEL, m_fd, NULL);
-
-        } else {
-
-            struct epoll_event setEvent;
-            setEvent.events = 0;
-            setEvent.data.ptr = this;
-            setEvent.events = EPOLLOUT;
-
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_MOD, m_fd, &setEvent);
-        }
-
-        clear_state (STATE_TCP_POLL_READ_CURRENT);
-    }
-}
-
-void ev_socket::enable_rd_notification () 
-{
-    if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) == 0 ) {
-
-        struct epoll_event setEvent;
-        setEvent.events = 0;
-        setEvent.data.ptr = this;
-
-        if ( is_set_state (STATE_TCP_POLL_WRITE_CURRENT) == 0) 
-        {
-            setEvent.events = EPOLLIN;
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_ADD, m_fd, &setEvent);
-        } 
-        else 
-        {
-            setEvent.events = EPOLLIN | EPOLLOUT;
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_MOD, m_fd, &setEvent);
-        }
-
-        set_state (STATE_TCP_POLL_READ_CURRENT);
-    }
-}
-
-void ev_socket::enable_wr_notification () 
-{
-    if ( is_set_state (STATE_TCP_POLL_WRITE_CURRENT) == 0 ) {
-
-        struct epoll_event setEvent;
-        setEvent.events = 0;
-        setEvent.data.ptr = this;
-
-        if ( is_set_state (STATE_TCP_POLL_READ_CURRENT) == 0) 
-        {
-            setEvent.events = EPOLLOUT;
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_ADD, m_fd, &setEvent);
-        } 
-        else 
-        {
-            setEvent.events = EPOLLIN | EPOLLOUT;
-            epoll_ctl(m_epoll_ctx->m_epoll_id, EPOLL_CTL_MOD, m_fd, &setEvent);
-        }
-
-        set_state (STATE_TCP_POLL_WRITE_CURRENT);
-    }
-}
-
 void ev_socket::read_next_data (char* readBuffer
                                 , int readBuffOffset
                                 , int readDataLen
@@ -330,8 +237,6 @@ void ev_socket::write_next_data (char* writeBuffer
 
 void ev_socket::write_close (int send_close_notify) {
     
-    enable_wr_notification ();
-
     if ( get_error_state() ) 
     {
         abort ();
@@ -1240,7 +1145,6 @@ void ev_socket::do_read_next_data ()
             {
                 notifyReadStatus = true;
                 m_read_status = READ_STATUS_TCP_CLOSE;
-                //disable_rd_notification ();
             } 
             else
             {

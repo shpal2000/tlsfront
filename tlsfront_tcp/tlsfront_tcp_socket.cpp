@@ -75,11 +75,6 @@ void tlsfront_tcp_socket::on_establish ()
     {
         m_session->m_session_established = true;
     }
-
-    if (m_write_buff_list.empty())
-    {
-        disable_wr_notification();
-    }
 }
 
 void tlsfront_tcp_socket::on_write ()
@@ -108,11 +103,6 @@ void tlsfront_tcp_socket::on_wstatus (int /*bytes_written*/, int write_status)
     else
     {
         //todo ??
-    }
-
-    if (m_write_buff_list.empty())
-    {
-        disable_wr_notification();
     }
 }
 
@@ -167,11 +157,6 @@ void tlsfront_tcp_socket::on_rstatus (int bytes_read, int read_status)
     }
     else
     {
-        if (m_other_socket->m_write_buff_list.empty())
-        {
-            m_other_socket->enable_wr_notification();
-        }
-
         m_read_buff->m_data_len = bytes_read;
         m_other_socket->m_write_buff_list.push(m_read_buff);
         m_read_buff = nullptr;

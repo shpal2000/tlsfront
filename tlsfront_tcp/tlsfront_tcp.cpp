@@ -15,8 +15,8 @@ int main(int /*argc*/, char ** /*argv*/)
 
     tcp_app_cfg.front_ip = "172.16.5.4";
     tcp_app_cfg.front_port = 5555;
-    tcp_app_cfg.back_ip = "151.101.52.223";
-    tcp_app_cfg.back_port = 443;
+    tcp_app_cfg.back_ip = "52.40.35.216";
+    tcp_app_cfg.back_port = 80;
 
     
     tlsfront_tcp_app* tcpApp 
