@@ -1,12 +1,14 @@
 #include "tlsfront_ssl_socket.hpp"
 #include "tlsfront_ssl_session.hpp"
 
-tlsfront_ssl_socket::tlsfront_ssl_socket()
+tlsfront_ssl_socket::tlsfront_ssl_socket(SSL_CTX* ssl_ctx)
 {
     m_session = nullptr;
     m_other_socket = nullptr;
     m_read_buff = nullptr;
     m_write_buff = nullptr;
+    m_ssl_init = false;
+    m_ssl_ctx = ssl_ctx;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
@@ -28,6 +30,19 @@ tlsfront_ssl_socket::~tlsfront_ssl_socket()
         ev_buff::free_ev_buff(m_write_buff_list.front());
         m_write_buff_list.pop();
     }
+}
+
+bool tlsfront_ssl_socket::ssl_init()
+{
+    m_ssl = SSL_new (m_ssl_ctx);
+
+    if (m_ssl){      
+        set_as_ssl_server (m_ssl);
+        m_ssl_init = true;
+        return true;
+    }
+    
+    return false;
 }
 
 void tlsfront_ssl_socket::on_establish ()
@@ -79,15 +94,25 @@ void tlsfront_ssl_socket::on_establish ()
 
 void tlsfront_ssl_socket::on_write ()
 {
-    if (!m_write_buff_list.empty())
+    if (this==m_session->m_front_socket && !m_ssl_init && !ssl_init())
     {
-        m_write_buff = m_write_buff_list.front();
-        m_write_buff_list.pop();
+        this->abort();
+        m_other_socket->abort();
 
-        write_next_data (m_write_buff->m_buff
-                            , 0
-                            , m_write_buff->m_data_len
-                            , false);
+        // todo???
+    }
+    else
+    {    
+        if (!m_write_buff_list.empty())
+        {
+            m_write_buff = m_write_buff_list.front();
+            m_write_buff_list.pop();
+
+            write_next_data (m_write_buff->m_buff
+                                , 0
+                                , m_write_buff->m_data_len
+                                , false);
+        }
     }
 }
 
@@ -108,19 +133,28 @@ void tlsfront_ssl_socket::on_wstatus (int /*bytes_written*/, int write_status)
 
 void tlsfront_ssl_socket::on_read ()
 {
-    ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
-
-    if (rd_buff)
+    if (this==m_session->m_front_socket && !m_ssl_init && !ssl_init())
     {
-        m_read_buff = rd_buff;
-        read_next_data (rd_buff->m_buff
-                        , 0
-                        , rd_buff->m_buff_len
-                        , true);
+        this->abort();
+        m_other_socket->abort();
+
+        // todo???
     }
     else
     {
-        //todo error handling
+        ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
+        if (rd_buff)
+        {
+            m_read_buff = rd_buff;
+            read_next_data (rd_buff->m_buff
+                            , 0
+                            , rd_buff->m_buff_len
+                            , true);
+        }
+        else
+        {
+            //todo error handling
+        }
     }
 }
 

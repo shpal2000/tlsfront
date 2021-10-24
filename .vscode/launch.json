@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/tlsfront_tcp/tlsfront_tcp.exe",
+            "program": "${workspaceFolder}/build/tlsfront_ssl/tlsfront_ssl.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -8,7 +8,7 @@ class tlsfront_ssl_session;
 class tlsfront_ssl_socket : public ev_socket
 {
 public:
-    tlsfront_ssl_socket();
+    tlsfront_ssl_socket(SSL_CTX* ssl_ctx);
     virtual ~tlsfront_ssl_socket();
     
     void on_establish ();
@@ -28,6 +28,13 @@ public:
 
     std::queue<ev_buff*> m_write_buff_list;
 
+private:
+    bool ssl_init();
+
+private:
+    bool m_ssl_init;
+    SSL_CTX* m_ssl_ctx;
+    SSL* m_ssl;
 };
 
 #endif
