@@ -8,6 +8,21 @@
 
 class tlsfront_ssl_socket;
 
+struct tlsfront_ssl_grp_ctx
+{
+    SSL_CTX* m_s_ssl_ctx;
+    SSL_CTX* m_c_ssl_ctx;
+};
+
+struct tlsfront_ssl_app_ctx
+{
+    ev_sockaddr m_front_addr;
+    ev_sockaddr m_back_addr;
+    ev_sockaddr m_local_addr;
+    ev_socket_opt m_sock_opt;
+    
+    std::vector<ev_sockstats*> m_stats_arr;
+};
 
 class tlsfront_ssl_app : public tlspack_app
 {
@@ -22,16 +37,11 @@ public:
     
     void free_socket(ev_socket* ev_sock);
 
-    ev_sockaddr m_front_addr;
-    ev_sockaddr m_back_addr;
-    ev_sockaddr m_local_addr;
-    ev_socket_opt m_sock_opt;
     tlsfront_ssl_stats m_stats;
-    std::vector<ev_sockstats*> m_stats_arr;
-
     tlsfront_ssl_socket* m_front_lsocket;
-    SSL_CTX* m_s_ssl_ctx;
-    SSL_CTX* m_c_ssl_ctx;
+
+    tlsfront_ssl_app_ctx m_app_ctx;
+    tlsfront_ssl_grp_ctx m_grp_ctx;
 
     bool m_init_ok;
 };

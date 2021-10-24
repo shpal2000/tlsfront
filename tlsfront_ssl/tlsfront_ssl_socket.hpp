@@ -8,7 +8,7 @@ class tlsfront_ssl_session;
 class tlsfront_ssl_socket : public ev_socket
 {
 public:
-    tlsfront_ssl_socket(SSL_CTX* s_ssl_ctx, SSL_CTX* c_ssl_ctx);
+    tlsfront_ssl_socket();
     virtual ~tlsfront_ssl_socket();
     
     void on_establish ();
@@ -27,15 +27,18 @@ public:
     ev_buff* m_write_buff;
 
     std::queue<ev_buff*> m_write_buff_list;
+    
+    tlsfront_ssl_app_ctx* m_app_ctx;
+    tlsfront_ssl_grp_ctx* m_grp_ctx;
 
 private:
     bool ssl_server_init();
     bool ssl_client_init();
+    void set_context_from(tlsfront_ssl_socket* from_sock);
+    void set_context_from_parent();
 
 private:
     bool m_ssl_init;
-    SSL_CTX* m_s_ssl_ctx;
-    SSL_CTX* m_c_ssl_ctx;
     SSL* m_ssl;
 };
 

@@ -1,16 +1,15 @@
 #include "tlsfront_ssl_socket.hpp"
 #include "tlsfront_ssl_session.hpp"
 
-tlsfront_ssl_socket::tlsfront_ssl_socket(SSL_CTX* s_ssl_ctx
-                                            , SSL_CTX* c_ssl_ctx)
+tlsfront_ssl_socket::tlsfront_ssl_socket()
 {
     m_session = nullptr;
     m_other_socket = nullptr;
     m_read_buff = nullptr;
     m_write_buff = nullptr;
     m_ssl_init = false;
-    m_s_ssl_ctx = s_ssl_ctx;
-    m_c_ssl_ctx = c_ssl_ctx;
+    m_app_ctx = nullptr;
+    m_grp_ctx = nullptr;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
@@ -36,7 +35,7 @@ tlsfront_ssl_socket::~tlsfront_ssl_socket()
 
 bool tlsfront_ssl_socket::ssl_server_init()
 {
-    m_ssl = SSL_new (m_s_ssl_ctx);
+    m_ssl = SSL_new (m_grp_ctx->m_s_ssl_ctx);
 
     if (m_ssl){      
         set_as_ssl_server (m_ssl);
@@ -49,7 +48,7 @@ bool tlsfront_ssl_socket::ssl_server_init()
 
 bool tlsfront_ssl_socket::ssl_client_init()
 {
-    m_ssl = SSL_new (m_c_ssl_ctx);
+    m_ssl = SSL_new (m_grp_ctx->m_c_ssl_ctx);
 
     if (m_ssl){      
         set_as_ssl_client (m_ssl);
@@ -60,25 +59,42 @@ bool tlsfront_ssl_socket::ssl_client_init()
     return false;
 }
 
+void tlsfront_ssl_socket::set_context_from(tlsfront_ssl_socket* from_sock)
+{
+    this->m_app_ctx = from_sock->m_app_ctx;
+    this->m_grp_ctx = from_sock->m_grp_ctx;
+}
+
+void tlsfront_ssl_socket::set_context_from_parent()
+{
+    tlsfront_ssl_socket* parent_socket 
+        = (tlsfront_ssl_socket*)this->get_parent();
+
+    set_context_from (parent_socket);
+}
+
 void tlsfront_ssl_socket::on_establish ()
 {
-    tlsfront_ssl_app* app = (tlsfront_ssl_app*) this->m_app;
-
     if (m_session == nullptr)
     {
+        set_context_from_parent();
+        
         tlsfront_ssl_socket* server_socket = this;
         tlsfront_ssl_session* new_sess = new tlsfront_ssl_session();
 
         if (new_sess)
         {
             tlsfront_ssl_socket* client_socket 
-             = (tlsfront_ssl_socket*) app->new_tcp_connect (&app->m_local_addr
-                                                            , &app->m_back_addr
-                                                            , &app->m_stats_arr
-                                                            , NULL
-                                                            , &app->m_sock_opt);
+                = (tlsfront_ssl_socket*) 
+                m_app->new_tcp_connect (&m_app_ctx->m_local_addr
+                                        , &m_app_ctx->m_back_addr
+                                        , &m_app_ctx->m_stats_arr
+                                        , NULL
+                                        , &m_app_ctx->m_sock_opt);
             if (client_socket)
             {
+                client_socket->set_context_from(server_socket);
+
                 server_socket->m_session = new_sess;
                 client_socket->m_session = new_sess;
 
@@ -88,7 +104,7 @@ void tlsfront_ssl_socket::on_establish ()
                 server_socket->m_other_socket = client_socket;
                 client_socket->m_other_socket = server_socket;
 
-                if (m_s_ssl_ctx && !ssl_server_init()) 
+                if (m_grp_ctx->m_s_ssl_ctx && !ssl_server_init()) 
                 {
                     this->abort();
                     m_other_socket->abort();
@@ -110,7 +126,7 @@ void tlsfront_ssl_socket::on_establish ()
     else
     {
         m_session->m_session_established = true;
-        if (m_c_ssl_ctx && !ssl_client_init()) 
+        if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
         {
             this->abort();
             m_other_socket->abort();
