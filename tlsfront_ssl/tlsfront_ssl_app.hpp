@@ -30,7 +30,9 @@ public:
     std::vector<ev_sockstats*> m_stats_arr;
 
     tlsfront_ssl_socket* m_front_lsocket;
-    SSL_CTX* m_ssl_ctx;
+    SSL_CTX* m_s_ssl_ctx;
+    SSL_CTX* m_c_ssl_ctx;
+
     bool m_init_ok;
 };
 

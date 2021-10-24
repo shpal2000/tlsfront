@@ -1,14 +1,16 @@
 #include "tlsfront_ssl_socket.hpp"
 #include "tlsfront_ssl_session.hpp"
 
-tlsfront_ssl_socket::tlsfront_ssl_socket(SSL_CTX* ssl_ctx)
+tlsfront_ssl_socket::tlsfront_ssl_socket(SSL_CTX* s_ssl_ctx
+                                            , SSL_CTX* c_ssl_ctx)
 {
     m_session = nullptr;
     m_other_socket = nullptr;
     m_read_buff = nullptr;
     m_write_buff = nullptr;
     m_ssl_init = false;
-    m_ssl_ctx = ssl_ctx;
+    m_s_ssl_ctx = s_ssl_ctx;
+    m_c_ssl_ctx = c_ssl_ctx;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
@@ -32,12 +34,25 @@ tlsfront_ssl_socket::~tlsfront_ssl_socket()
     }
 }
 
-bool tlsfront_ssl_socket::ssl_init()
+bool tlsfront_ssl_socket::ssl_server_init()
 {
-    m_ssl = SSL_new (m_ssl_ctx);
+    m_ssl = SSL_new (m_s_ssl_ctx);
 
     if (m_ssl){      
         set_as_ssl_server (m_ssl);
+        m_ssl_init = true;
+        return true;
+    }
+    
+    return false;
+}
+
+bool tlsfront_ssl_socket::ssl_client_init()
+{
+    m_ssl = SSL_new (m_c_ssl_ctx);
+
+    if (m_ssl){      
+        set_as_ssl_client (m_ssl);
         m_ssl_init = true;
         return true;
     }
@@ -72,6 +87,12 @@ void tlsfront_ssl_socket::on_establish ()
 
                 server_socket->m_other_socket = client_socket;
                 client_socket->m_other_socket = server_socket;
+
+                if (m_s_ssl_ctx && !ssl_server_init()) 
+                {
+                    this->abort();
+                    m_other_socket->abort();
+                }
             }
             else
             {
@@ -89,30 +110,25 @@ void tlsfront_ssl_socket::on_establish ()
     else
     {
         m_session->m_session_established = true;
+        if (m_c_ssl_ctx && !ssl_client_init()) 
+        {
+            this->abort();
+            m_other_socket->abort();
+        }
     }
 }
 
 void tlsfront_ssl_socket::on_write ()
 {
-    if (this==m_session->m_front_socket && !m_ssl_init && !ssl_init())
+    if (!m_write_buff_list.empty())
     {
-        this->abort();
-        m_other_socket->abort();
+        m_write_buff = m_write_buff_list.front();
+        m_write_buff_list.pop();
 
-        // todo???
-    }
-    else
-    {    
-        if (!m_write_buff_list.empty())
-        {
-            m_write_buff = m_write_buff_list.front();
-            m_write_buff_list.pop();
-
-            write_next_data (m_write_buff->m_buff
-                                , 0
-                                , m_write_buff->m_data_len
-                                , false);
-        }
+        write_next_data (m_write_buff->m_buff
+                            , 0
+                            , m_write_buff->m_data_len
+                            , false);
     }
 }
 
@@ -133,28 +149,18 @@ void tlsfront_ssl_socket::on_wstatus (int /*bytes_written*/, int write_status)
 
 void tlsfront_ssl_socket::on_read ()
 {
-    if (this==m_session->m_front_socket && !m_ssl_init && !ssl_init())
+    ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
+    if (rd_buff)
     {
-        this->abort();
-        m_other_socket->abort();
-
-        // todo???
+        m_read_buff = rd_buff;
+        read_next_data (rd_buff->m_buff
+                        , 0
+                        , rd_buff->m_buff_len
+                        , true);
     }
     else
     {
-        ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
-        if (rd_buff)
-        {
-            m_read_buff = rd_buff;
-            read_next_data (rd_buff->m_buff
-                            , 0
-                            , rd_buff->m_buff_len
-                            , true);
-        }
-        else
-        {
-            //todo error handling
-        }
+        //todo error handling
     }
 }
 

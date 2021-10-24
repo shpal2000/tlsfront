@@ -12,9 +12,9 @@ int main(int /*argc*/, char ** /*argv*/)
     tlsfront_ssl_stats ssl_app_gstats;
 
     ssl_app_cfg.front_ip = "172.16.5.4";
-    ssl_app_cfg.front_port = 5555;
-    ssl_app_cfg.back_ip = "151.101.52.223";
-    ssl_app_cfg.back_port = 80;
+    ssl_app_cfg.front_port = 5556;
+    ssl_app_cfg.back_ip = "54.148.237.114";
+    ssl_app_cfg.back_port = 443;
 
     
     tlsfront_ssl_app* tcpApp 
