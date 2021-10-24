@@ -5,8 +5,6 @@
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    signal(SIGPIPE, SIG_IGN);
-
     std::vector<tlspack_app*> app_list;
     std::vector<tlspack_app_stats*> stats_list;
 
@@ -15,8 +13,8 @@ int main(int /*argc*/, char ** /*argv*/)
 
     tcp_app_cfg.front_ip = "172.16.5.4";
     tcp_app_cfg.front_port = 5555;
-    tcp_app_cfg.back_ip = "52.40.35.216";
-    tcp_app_cfg.back_port = 80;
+    tcp_app_cfg.back_ip = "142.250.217.68";
+    tcp_app_cfg.back_port = 443;
 
     
     tlsfront_tcp_app* tcpApp 
