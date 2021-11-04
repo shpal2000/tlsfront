@@ -6,7 +6,6 @@ tlsfront_ssl_socket::tlsfront_ssl_socket()
     m_session = nullptr;
     m_other_socket = nullptr;
     m_read_buff = nullptr;
-    m_write_buff = nullptr;
     m_ssl_init = false;
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
@@ -18,12 +17,6 @@ tlsfront_ssl_socket::~tlsfront_ssl_socket()
     {
         ev_buff::free_ev_buff(m_read_buff);
         m_read_buff = nullptr;
-    }
-
-    if (m_write_buff)
-    {
-        ev_buff::free_ev_buff(m_write_buff);
-        m_write_buff = nullptr;
     }
 
     while (!m_write_buff_list.empty())
@@ -138,28 +131,32 @@ void tlsfront_ssl_socket::on_write ()
 {
     if (!m_write_buff_list.empty())
     {
-        m_write_buff = m_write_buff_list.front();
-        m_write_buff_list.pop();
+        ev_buff* w_buff = m_write_buff_list.front();
 
-        write_next_data (m_write_buff->m_buff
-                            , 0
-                            , m_write_buff->m_data_len
-                            , false);
+        write_next_data (w_buff->m_buff
+                        , w_buff->m_data_offset
+                        , w_buff->m_data_len - w_buff->m_data_offset);
     }
 }
 
-void tlsfront_ssl_socket::on_wstatus (int /*bytes_written*/, int write_status)
+void tlsfront_ssl_socket::on_wstatus (int bytes_written, int write_status)
 {
-    ev_buff::free_ev_buff(m_write_buff);
-    m_write_buff = nullptr;
+
 
     if (write_status == WRITE_STATUS_NORMAL)
     {
-        //todo ???
+        ev_buff* w_buff = m_write_buff_list.front();
+        w_buff->m_data_offset += bytes_written;
+        if (w_buff->m_data_offset == w_buff->m_data_len)
+        {
+            m_write_buff_list.pop();
+            ev_buff::free_ev_buff(w_buff);
+        }
     }
     else
     {
-        //todo ??
+        this->abort();
+        m_other_socket->abort();
     }
 }
 
@@ -169,8 +166,10 @@ void tlsfront_ssl_socket::on_read ()
     if (rd_buff)
     {
         m_read_buff = rd_buff;
+        m_read_buff->m_data_offset = 0;
+        m_read_buff->m_data_len = 0;
         read_next_data (rd_buff->m_buff
-                        , 0
+                        , m_read_buff->m_data_offset
                         , rd_buff->m_buff_len);
     }
     else

@@ -24,8 +24,6 @@ public:
     tlsfront_ssl_socket* m_other_socket;
 
     ev_buff* m_read_buff;
-    ev_buff* m_write_buff;
-
     std::queue<ev_buff*> m_write_buff_list;
     
     tlsfront_ssl_app_ctx* m_app_ctx;

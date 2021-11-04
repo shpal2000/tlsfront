@@ -86,8 +86,7 @@ void tlsfront_tcp_socket::on_write ()
 
         write_next_data (m_write_buff->m_buff
                             , 0
-                            , m_write_buff->m_data_len
-                            , false);
+                            , m_write_buff->m_data_len);
     }
 }
 

@@ -202,8 +202,7 @@ void ev_socket::read_next_data (char* readBuffer
 
 void ev_socket::write_next_data (char* writeBuffer
                                 , int writeBuffOffset
-                                , int writeDataLen
-                                , bool partialWrite)
+                                , int writeDataLen)
 {
     set_state (STATE_CONN_WRITE_PENDING);
 
@@ -211,17 +210,7 @@ void ev_socket::write_next_data (char* writeBuffer
     m_write_buff_offset = writeBuffOffset;
     m_write_data_len = writeDataLen;
 
-    m_write_buff_offset_cur = writeBuffOffset;
-    m_write_data_len_cur = writeDataLen;
-    m_write_bytes_len_cur = 0;
-
     m_write_status = WRITE_STATUS_NORMAL;
-
-    if (partialWrite) {
-        set_state (STATE_CONN_PARTIAL_WRITE);
-    } else {
-        clear_state (STATE_CONN_PARTIAL_WRITE);
-    }
 }
 
 void ev_socket::write_close (int send_close_notify) {
@@ -1159,17 +1148,16 @@ void ev_socket::do_write_next_data ()
 {
     int bytesSent;
     if ( is_set_state (STATE_SSL_ENABLED_CONN) ) { 
-        bytesSent = ssl_write ( m_write_buffer + m_write_buff_offset_cur
-                                , m_write_data_len_cur );
+        bytesSent = ssl_write ( m_write_buffer + m_write_buff_offset
+                                , m_write_data_len );
     } else {
-        bytesSent = tcp_write ( m_write_buffer + m_write_buff_offset_cur
-                                , m_write_data_len_cur );
+        bytesSent = tcp_write ( m_write_buffer + m_write_buff_offset
+                                , m_write_data_len );
     }
 
-    bool notifyWriteStatus = false;
+    bool notifyWriteStatus = true;
     if ( get_error_state() )
     {
-        notifyWriteStatus = true;
         switch ( get_sys_errno() ) 
         {
             case ETIMEDOUT:
@@ -1189,28 +1177,15 @@ void ev_socket::do_write_next_data ()
         if (bytesSent <= 0)
         {
             // ssl want read write; skip
-        }
-        else
-        {
-            //process written data
-            m_write_bytes_len_cur += bytesSent;
-            m_write_buff_offset_cur += bytesSent;
-            m_write_data_len_cur -= bytesSent;
-
-            if ( is_set_state (STATE_CONN_PARTIAL_WRITE) 
-                || (m_write_bytes_len_cur == m_write_data_len) )
-            {
-                notifyWriteStatus = true;
-            }
+            notifyWriteStatus = false;
         }
     }
 
     if (notifyWriteStatus) 
     {
         clear_state (STATE_CONN_WRITE_PENDING);
-        on_wstatus (m_write_bytes_len_cur, m_write_status);
+        on_wstatus (bytesSent, m_write_status);
     }
-
 }
 
 //////////////////////////event processing///////////////////////////////////
@@ -1279,7 +1254,7 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                         bool continue_read = false;
                         do 
                         {
-                            if (sockp->is_set_state(STATE_CONN_READ_PENDING)==0
+                            if ((sockp->is_set_state(STATE_CONN_READ_PENDING)==0)
                                 && (sockp->is_fd_closed() == false))
                             {
                                 sockp->on_read();
@@ -1294,10 +1269,10 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                     }
 
                     //handle write
-                    if ( (events & EPOLLOUT) 
-                            && (sockp->is_fd_closed() == false) )
+                    if (events & EPOLLOUT)
                     {
-                        if (sockp->is_set_state(STATE_CONN_WRITE_PENDING) == 0)
+                        if ((sockp->is_set_state(STATE_CONN_WRITE_PENDING)==0)
+                            && (sockp->is_fd_closed() == false))
                         {
                             if (sockp->is_set_state(STATE_NO_MORE_WRITE_DATA))
                             {
