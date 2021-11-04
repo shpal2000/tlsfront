@@ -4,7 +4,6 @@
             "name": "Linux",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/tlspack-socket",
                 "${workspaceFolder}/subprojects",
                 "${workspaceFolder}",
                 "${workspaceFolder}/tlspack_socket"
