@@ -189,8 +189,7 @@ void ev_socket::disable_wr_notification ()
 
 void ev_socket::read_next_data (char* readBuffer
                                 , int readBuffOffset
-                                , int readDataLen
-                                , bool partialRead) 
+                                , int readDataLen) 
 {
     set_state (STATE_CONN_READ_PENDING);
 
@@ -198,17 +197,7 @@ void ev_socket::read_next_data (char* readBuffer
     m_read_buff_offset = readBuffOffset;
     m_read_data_len = readDataLen;
 
-    m_read_buff_offset_cur = readBuffOffset;
-    m_read_data_len_cur = readDataLen;
-    m_read_bytes_len_cur = 0;
-
-    m_read_status = READ_STATUS_NORMAL;
-
-    if (partialRead) {
-        set_state (STATE_CONN_PARTIAL_READ);
-    } else {
-        clear_state (STATE_CONN_PARTIAL_READ);
-    }    
+    m_read_status = READ_STATUS_NORMAL;    
 }
 
 void ev_socket::write_next_data (char* writeBuffer
@@ -833,10 +822,10 @@ void ev_socket::tcp_accept (ev_socket* ev_sock_parent)
 
 int ev_socket::ssl_read (char* dataBuffer, int dataLen) 
 {
-    int bytesSent = SSL_read(m_ssl, dataBuffer, dataLen);
+    int bytes_received = SSL_read(m_ssl, dataBuffer, dataLen);
 
-    if (bytesSent <= 0) {
-        int sslError = SSL_get_error(m_ssl, bytesSent);
+    if (bytes_received <= 0) {
+        int sslError = SSL_get_error(m_ssl, bytes_received);
         switch (sslError) {
             case SSL_ERROR_ZERO_RETURN:
             case SSL_ERROR_SYSCALL:
@@ -853,7 +842,7 @@ int ev_socket::ssl_read (char* dataBuffer, int dataLen)
         }
     }
 
-    return bytesSent;
+    return bytes_received;
 }
 
 int ev_socket::ssl_write (const char* dataBuffer, int dataLen) 
@@ -1106,24 +1095,23 @@ void ev_socket::do_close_connection ()
     }
 }
 
-void ev_socket::do_read_next_data ()
+bool ev_socket::do_read_next_data ()
 {
-    int bytesReceived;
+    int bytes_received;
     if ( is_set_state (STATE_SSL_ENABLED_CONN) ) {
-        bytesReceived  
-            = ssl_read ( m_read_buffer + m_read_buff_offset_cur
-                        , m_read_data_len_cur);
+        bytes_received  
+            = ssl_read ( m_read_buffer + m_read_buff_offset
+                        , m_read_data_len);
     } else {
-        bytesReceived  
-            = tcp_read ( m_read_buffer + m_read_buff_offset_cur
-                        , m_read_data_len_cur);
+        bytes_received  
+            = tcp_read ( m_read_buffer + m_read_buff_offset
+                        , m_read_data_len);
     }
 
-    bool notifyReadStatus = false;
+    bool notify_read_status = true;
 
     if ( get_error_state() ) 
     {
-        notifyReadStatus = true;
         switch ( get_sys_errno() ) 
         {
             case ETIMEDOUT:
@@ -1140,38 +1128,31 @@ void ev_socket::do_read_next_data ()
     } 
     else
     {
-        if (bytesReceived <= 0) {
+        if (bytes_received <= 0) {
             if ( is_set_state (STATE_TCP_REMOTE_CLOSED) ) 
             {
-                notifyReadStatus = true;
                 m_read_status = READ_STATUS_TCP_CLOSE;
             } 
             else
             {
-                // ssl want read write; skip;
-            }
-        }
-        else 
-        {
-            //process read data
-            m_read_bytes_len_cur += bytesReceived;
-            m_read_buff_offset_cur += bytesReceived;
-            m_read_data_len_cur -= bytesReceived;
-
-            if ( is_set_state (STATE_CONN_PARTIAL_READ) 
-                || (m_read_bytes_len_cur == m_read_data_len) )
-            {
-                notifyReadStatus = true;
+                // ssl want read write; EAGAIN; skip;
+                notify_read_status = false;
             }
         }
     }
 
-    if (notifyReadStatus) 
+    if (notify_read_status) 
     {
         clear_state (STATE_CONN_READ_PENDING);
-        on_rstatus (m_read_bytes_len_cur, m_read_status);
+        on_rstatus (bytes_received, m_read_status);
     }
 
+    if (bytes_received == m_read_data_len)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 void ev_socket::do_write_next_data ()
@@ -1293,20 +1274,25 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                             (sockp->is_set_state(STATE_SSL_ENABLED_CONN)== 0)) )
                 {
                     //handle read
-                    if ( (events & EPOLLIN) 
-                            && (sockp->is_fd_closed() == false) )
+                    if (events & EPOLLIN)
                     {
-                        if (sockp->is_set_state(STATE_CONN_READ_PENDING)== 0)
+                        bool continue_read = false;
+                        do 
                         {
-                            sockp->on_read();
-                        }
+                            if (sockp->is_set_state(STATE_CONN_READ_PENDING)==0
+                                && (sockp->is_fd_closed() == false))
+                            {
+                                sockp->on_read();
+                            }
 
-                        if (sockp->is_set_state(STATE_CONN_READ_PENDING)
-                            && (sockp->is_fd_closed() == false))
-                        {
-                            sockp->do_read_next_data ();
-                        }
+                            if (sockp->is_set_state(STATE_CONN_READ_PENDING)
+                                && (sockp->is_fd_closed() == false))
+                            {
+                                continue_read = sockp->do_read_next_data ();
+                            }
+                        } while(continue_read);
                     }
+
                     //handle write
                     if ( (events & EPOLLOUT) 
                             && (sockp->is_fd_closed() == false) )

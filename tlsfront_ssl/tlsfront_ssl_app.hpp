@@ -17,8 +17,8 @@ struct tlsfront_ssl_grp_ctx
 struct tlsfront_ssl_app_ctx
 {
     ev_sockaddr m_front_addr;
+    ev_sockaddr m_server_addr;
     ev_sockaddr m_back_addr;
-    ev_sockaddr m_local_addr;
     ev_socket_opt m_sock_opt;
     
     std::vector<ev_sockstats*> m_stats_arr;

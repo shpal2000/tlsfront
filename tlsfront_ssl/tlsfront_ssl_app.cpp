@@ -10,12 +10,12 @@ tlsfront_ssl_app::tlsfront_ssl_app(tlsfront_ssl_cfg* cfg
                             , cfg->front_ip.c_str()
                             , htons(cfg->front_port));
 
+    ev_socket::set_sockaddr (&m_app_ctx.m_server_addr
+                            , cfg->server_ip.c_str()
+                            , htons(cfg->server_port));
+
     ev_socket::set_sockaddr (&m_app_ctx.m_back_addr
                             , cfg->back_ip.c_str()
-                            , htons(cfg->back_port));
-
-    ev_socket::set_sockaddr (&m_app_ctx.m_local_addr
-                            , cfg->front_ip.c_str()
                             , 0);
 
     m_app_ctx.m_sock_opt.rcv_buff_len = 0;

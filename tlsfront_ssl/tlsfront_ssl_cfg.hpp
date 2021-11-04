@@ -10,7 +10,10 @@ struct tlsfront_ssl_cfg
     u_short front_port;
 
     std::string back_ip;
-    u_short back_port;
+    // u_short back_port;
+
+    std::string server_ip;
+    u_short server_port;
 
 };
 

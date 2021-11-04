@@ -86,7 +86,7 @@ struct ev_socket_opt {
 #define STATE_CONN_PARTIAL_WRITE                        0x0000004000000000
 #define STATE_CONN_MARK_DELETE                          0x0000008000000000
 #define STATE_TCP_SOCK_LINGER                           0x0000010000000000
-#define STATE_CONN_PARTIAL_READ                         0x0000020000000000
+#define _STATE_CONN_PARTIAL_READ                         0x0000020000000000
 #define STATE_TCP_SOCK_IP_TRANSPARENT                   0x0000040000000000
 #define STATE_CONN_MARK_FINISH                          0x0000080000000000
 
@@ -337,10 +337,6 @@ private:
     int m_read_buff_offset;
     int m_read_data_len;
 
-    int m_read_buff_offset_cur;
-    int m_read_data_len_cur;
-    int m_read_bytes_len_cur;
-
     int m_write_status;
 
     char* m_write_buffer;
@@ -552,8 +548,7 @@ public:
 
     void read_next_data (char* readBuffer
                             , int readBuffOffset
-                            , int readDataLen
-                            , bool partialRead);
+                            , int readDataLen);
 
     void write_next_data (char* writeBuffer
                             , int writeBuffOffset
@@ -594,7 +589,7 @@ private:
     void handle_tcp_connect_complete ();
     void do_ssl_handshake ();
     void do_close_connection ();
-    void do_read_next_data ();
+    bool do_read_next_data ();
     void do_write_next_data ();
 
     ///////////////////////////////utility functions/////////////////////////

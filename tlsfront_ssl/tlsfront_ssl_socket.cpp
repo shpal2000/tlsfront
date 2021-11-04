@@ -86,8 +86,8 @@ void tlsfront_ssl_socket::on_establish ()
         {
             tlsfront_ssl_socket* client_socket 
                 = (tlsfront_ssl_socket*) 
-                m_app->new_tcp_connect (&m_app_ctx->m_local_addr
-                                        , &m_app_ctx->m_back_addr
+                m_app->new_tcp_connect (&m_app_ctx->m_back_addr
+                                        , &m_app_ctx->m_server_addr
                                         , &m_app_ctx->m_stats_arr
                                         , NULL
                                         , &m_app_ctx->m_sock_opt);
@@ -165,14 +165,13 @@ void tlsfront_ssl_socket::on_wstatus (int /*bytes_written*/, int write_status)
 
 void tlsfront_ssl_socket::on_read ()
 {
-    ev_buff* rd_buff = ev_buff::alloc_ev_buff(2048);
+    ev_buff* rd_buff = ev_buff::alloc_ev_buff(20480);
     if (rd_buff)
     {
         m_read_buff = rd_buff;
         read_next_data (rd_buff->m_buff
                         , 0
-                        , rd_buff->m_buff_len
-                        , true);
+                        , rd_buff->m_buff_len);
     }
     else
     {

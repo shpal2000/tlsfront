@@ -115,8 +115,7 @@ void tlsfront_tcp_socket::on_read ()
         m_read_buff = rd_buff;
         read_next_data (rd_buff->m_buff
                         , 0
-                        , rd_buff->m_buff_len
-                        , true);
+                        , rd_buff->m_buff_len);
     }
     else
     {
