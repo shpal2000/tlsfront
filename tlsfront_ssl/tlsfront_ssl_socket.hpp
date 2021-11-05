@@ -38,6 +38,8 @@ private:
 private:
     bool m_ssl_init;
     SSL* m_ssl;
+
+    bool m_abrupt_finish;
 };
 
 #endif

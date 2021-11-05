@@ -16,7 +16,7 @@ int main(int /*argc*/, char ** /*argv*/)
     ssl_app_cfg.front_ip = "127.0.0.1";
     ssl_app_cfg.front_port = 5556;
 
-    ssl_app_cfg.server_ip = "54.148.237.114";
+    ssl_app_cfg.server_ip = "151.101.52.223";
     ssl_app_cfg.server_port = 443;
 
     ssl_app_cfg.back_ip = "172.16.5.4";
@@ -29,7 +29,7 @@ int main(int /*argc*/, char ** /*argv*/)
     stats_list.push_back(&ssl_app_gstats);
 
     
-    std::cout << "http://127.0.0.1:5556" << "\n\n";
+    std::cout << "https://127.0.0.1:5556" << "\n\n";
 
     fflush(stdout);
 
