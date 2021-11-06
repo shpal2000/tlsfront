@@ -80,6 +80,7 @@ struct ev_socket_opt {
 #define STATE_TCP_SOCK_LINGER                           0x0000010000000000
 #define STATE_TCP_SOCK_IP_TRANSPARENT                   0x0000040000000000
 #define STATE_CONN_MARK_FINISH                          0x0000080000000000
+#define STATE_CONN_CLOSE_ON_ERROR                       0x0000100000000000
 
 #define STATE_TCP_SOCK_CREATE_FAIL                      0x0000000000000001
 #define STATE_TCP_SOCK_BIND_FAIL                        0x0000000000000002
@@ -347,7 +348,7 @@ public:
     virtual void on_read () = 0;
     virtual void on_rstatus (int bytes_read
                             , int read_status) = 0;
-    virtual void on_finish () = 0;
+    virtual void on_finish (bool) = 0;
 
     ev_socket* get_parent () {return m_parent;};
 

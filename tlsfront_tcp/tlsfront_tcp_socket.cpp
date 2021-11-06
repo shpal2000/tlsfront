@@ -161,7 +161,7 @@ void tlsfront_tcp_socket::on_rstatus (int bytes_read, int read_status)
     }
 }
 
-void tlsfront_tcp_socket::on_finish ()
+void tlsfront_tcp_socket::on_finish (bool /*is_error*/)
 {
     if (m_session)
     {

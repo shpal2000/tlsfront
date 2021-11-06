@@ -1042,6 +1042,11 @@ void ev_socket::do_close_connection ()
 {
     if ( get_error_state() || is_set_state(STATE_TCP_TO_SEND_RST) )
     {
+        if (get_error_state())
+        {
+            set_state(STATE_CONN_CLOSE_ON_ERROR);
+        }
+
         close_socket ();
     }
     else
@@ -1077,7 +1082,13 @@ void ev_socket::do_close_connection ()
         }
 
         if ( get_error_state () 
-            || ( is_set_state (STATE_TCP_REMOTE_CLOSED)  &&  wrShutdownDone) ) {
+            || ( is_set_state (STATE_TCP_REMOTE_CLOSED)  &&  wrShutdownDone) ) 
+        {
+
+            if (get_error_state())
+            {
+                set_state(STATE_CONN_CLOSE_ON_ERROR);
+            }
 
             close_socket ();
         }        
@@ -1316,7 +1327,8 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
         if ( epoll_ctxp->m_finish_list.empty() == false )
         {
             ev_socket* ev_sock_ptr = epoll_ctxp->m_finish_list.front();
-            ev_sock_ptr->on_finish ();
+            bool is_error = ev_sock_ptr->is_set_state(STATE_CONN_CLOSE_ON_ERROR);
+            ev_sock_ptr->on_finish (is_error);
             epoll_ctxp->m_app->remove_from_active_list (ev_sock_ptr);
             epoll_ctxp->m_app->free_socket (ev_sock_ptr);
             epoll_ctxp->m_finish_list.pop();

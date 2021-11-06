@@ -9,7 +9,6 @@ tlsfront_ssl_socket::tlsfront_ssl_socket()
     m_ssl_init = false;
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
-    m_abrupt_finish = true;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
@@ -101,24 +100,19 @@ void tlsfront_ssl_socket::on_establish ()
                 if (m_grp_ctx->m_s_ssl_ctx && !ssl_server_init()) 
                 {
                     this->abort();
-                    this->m_abrupt_finish = false;
-
                     m_other_socket->abort();
-                    m_other_socket->m_abrupt_finish = false;
                 }
             }
             else
             {
                 delete new_sess;
                 server_socket->abort();
-                server_socket->m_abrupt_finish = false;
                 //stats ???
             }
         }
         else
         {
                 server_socket->abort();
-                server_socket->m_abrupt_finish = false;
                 //stats ???
         }
     } 
@@ -128,10 +122,8 @@ void tlsfront_ssl_socket::on_establish ()
         if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
         {
             this->abort();
-            this->m_abrupt_finish = false;
 
             m_other_socket->abort();
-            m_other_socket->m_abrupt_finish = false;
         }
     }
 }
@@ -165,10 +157,8 @@ void tlsfront_ssl_socket::on_wstatus (int bytes_written, int write_status)
     else
     {
         this->abort();
-        this->m_abrupt_finish = false;
 
         m_other_socket->abort();
-        m_other_socket->m_abrupt_finish = false;
     }
 }
 
@@ -203,10 +193,8 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
             else
             {
                 this->abort();
-                this->m_abrupt_finish = false;
 
                 m_other_socket->abort();
-                m_other_socket->m_abrupt_finish = false;
             }
         }
         else
@@ -214,12 +202,10 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
             if (read_status == READ_STATUS_TCP_CLOSE) 
             {
                 this->write_close();
-                this->m_abrupt_finish = false;
             }
             else
             {
                 this->abort();
-                this->m_abrupt_finish = false;
             }
         }
 
@@ -234,12 +220,11 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
     }
 }
 
-void tlsfront_ssl_socket::on_finish ()
+void tlsfront_ssl_socket::on_finish (bool is_error)
 {
-    if (this->m_abrupt_finish)
+    if (is_error)
     {
         m_other_socket->abort();
-        m_other_socket->m_abrupt_finish = false;
     }
 
     if (m_session)
