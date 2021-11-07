@@ -1327,8 +1327,11 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
         if ( epoll_ctxp->m_finish_list.empty() == false )
         {
             ev_socket* ev_sock_ptr = epoll_ctxp->m_finish_list.front();
-            bool is_error = ev_sock_ptr->is_set_state(STATE_CONN_CLOSE_ON_ERROR);
-            ev_sock_ptr->on_finish (is_error);
+            if (ev_sock_ptr->is_set_state(STATE_CONN_CLOSE_ON_ERROR))
+            {
+                ev_sock_ptr->on_error ();
+            }
+            ev_sock_ptr->on_finish ();
             epoll_ctxp->m_app->remove_from_active_list (ev_sock_ptr);
             epoll_ctxp->m_app->free_socket (ev_sock_ptr);
             epoll_ctxp->m_finish_list.pop();

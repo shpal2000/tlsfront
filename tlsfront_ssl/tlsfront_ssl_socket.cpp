@@ -220,13 +220,13 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
     }
 }
 
-void tlsfront_ssl_socket::on_finish (bool is_error)
+void tlsfront_ssl_socket::on_error ()
 {
-    if (is_error)
-    {
-        m_other_socket->abort();
-    }
+    m_other_socket->abort();
+}
 
+void tlsfront_ssl_socket::on_finish ()
+{
     if (m_session)
     {
         if (!m_other_socket->m_session)

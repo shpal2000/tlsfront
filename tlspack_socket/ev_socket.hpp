@@ -348,7 +348,8 @@ public:
     virtual void on_read () = 0;
     virtual void on_rstatus (int bytes_read
                             , int read_status) = 0;
-    virtual void on_finish (bool) = 0;
+    virtual void on_error () = 0;
+    virtual void on_finish () = 0;
 
     ev_socket* get_parent () {return m_parent;};
 

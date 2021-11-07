@@ -16,7 +16,8 @@ public:
     void on_wstatus (int bytes_written, int write_status);
     void on_read ();
     void on_rstatus (int bytes_read, int read_status);
-    void on_finish (bool is_error);
+    void on_error ();
+    void on_finish ();
 
 public:
     tlsfront_tcp_session* m_session;
