@@ -52,10 +52,10 @@ tlsfront_ssl_app::tlsfront_ssl_app(tlsfront_ssl_cfg* cfg
         SSL_CTX_set_dh_auto(m_grp_ctx.m_s_ssl_ctx, 1);
 
         const char* server_cert 
-            = "/workspaces/tlsfront/tlsfront_ssl/cert.pem";
+            = "./cert.pem";
 
         const char* server_key 
-            = "/workspaces/tlsfront/tlsfront_ssl/key.pem";
+            = "./key.pem";
 
         std::ifstream f(server_cert);
         std::ostringstream ss;
