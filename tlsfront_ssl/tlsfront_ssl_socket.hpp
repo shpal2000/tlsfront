@@ -36,6 +36,7 @@ private:
     bool ssl_client_init();
     void set_context_from(tlsfront_ssl_socket* from_sock);
     void set_context_from_parent();
+    void abort_session();
 
 private:
     bool m_ssl_init;

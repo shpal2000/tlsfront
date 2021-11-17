@@ -24,6 +24,12 @@ tlsfront_ssl_socket::~tlsfront_ssl_socket()
         ev_buff::free_ev_buff(m_write_buff_list.front());
         m_write_buff_list.pop();
     }
+
+    if (m_ssl)
+    {
+        SSL_free (m_ssl);
+        m_ssl = nullptr;
+    }
 }
 
 bool tlsfront_ssl_socket::ssl_server_init()
@@ -66,6 +72,12 @@ void tlsfront_ssl_socket::set_context_from_parent()
     set_context_from (parent_socket);
 }
 
+void tlsfront_ssl_socket::abort_session()
+{
+    this->abort();
+    m_other_socket->abort();
+}
+
 void tlsfront_ssl_socket::on_establish ()
 {
     if (m_session == nullptr)
@@ -77,6 +89,9 @@ void tlsfront_ssl_socket::on_establish ()
 
         if (new_sess)
         {
+            server_socket->m_session = new_sess;
+            m_session->m_front_socket = server_socket;
+
             tlsfront_ssl_socket* client_socket 
                 = (tlsfront_ssl_socket*) 
                 m_app->new_tcp_connect (&m_app_ctx->m_back_addr
@@ -88,10 +103,7 @@ void tlsfront_ssl_socket::on_establish ()
             {
                 client_socket->set_context_from(server_socket);
 
-                server_socket->m_session = new_sess;
                 client_socket->m_session = new_sess;
-
-                m_session->m_front_socket = server_socket;
                 m_session->m_back_socket = client_socket;
 
                 server_socket->m_other_socket = client_socket;
@@ -99,8 +111,7 @@ void tlsfront_ssl_socket::on_establish ()
 
                 if (m_grp_ctx->m_s_ssl_ctx && !ssl_server_init()) 
                 {
-                    this->abort();
-                    m_other_socket->abort();
+                    abort_session();
                 }
             }
             else
@@ -121,9 +132,7 @@ void tlsfront_ssl_socket::on_establish ()
         m_session->m_session_established = true;
         if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
         {
-            this->abort();
-
-            m_other_socket->abort();
+            abort_session();
         }
     }
 }
@@ -156,9 +165,7 @@ void tlsfront_ssl_socket::on_wstatus (int bytes_written, int write_status)
     }
     else
     {
-        this->abort();
-
-        m_other_socket->abort();
+        abort_session ();
     }
 }
 
@@ -177,6 +184,7 @@ void tlsfront_ssl_socket::on_read ()
     else
     {
         //todo error handling
+        abort_session ();
     }
 }
 
@@ -192,9 +200,7 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
             }
             else
             {
-                this->abort();
-
-                m_other_socket->abort();
+                abort_session ();
             }
         }
         else

@@ -523,7 +523,7 @@ int ev_socket::tcp_listen(epoll_ctx* epoll_ctxp
         int so_op = 1;
         int so_reuse_status = setsockopt(m_fd
                                         , SOL_SOCKET
-                                        , SO_REUSEADDR
+                                        , SO_REUSEPORT
                                         , &so_op
                                         , sizeof(int));
         if (so_reuse_status == -1)

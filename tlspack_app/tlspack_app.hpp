@@ -21,6 +21,7 @@
 #include <map>
 #include <random>
 #include <inttypes.h>
+#include <signal.h>
 
 #include <json/single_include/nlohmann/json.hpp>
 
