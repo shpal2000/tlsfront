@@ -10,6 +10,7 @@ tlsfront_ssl_socket::tlsfront_ssl_socket()
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
     m_ssl = nullptr;
+    m_write_close_marked = false;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
@@ -162,6 +163,11 @@ void tlsfront_ssl_socket::on_wstatus (int bytes_written, int write_status)
         {
             m_write_buff_list.pop();
             ev_buff::free_ev_buff(w_buff);
+
+            if (m_write_buff_list.empty() && m_write_close_marked)
+            {
+                this->write_close();
+            }
         }
     }
     else
@@ -197,7 +203,14 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
         {
             if (read_status == READ_STATUS_TCP_CLOSE) 
             {
-                m_other_socket->write_close();
+                if (m_other_socket->m_write_buff_list.empty())
+                {
+                    m_other_socket->write_close();
+                }
+                else
+                {
+                    m_other_socket->m_write_close_marked = true;
+                }
             }
             else
             {

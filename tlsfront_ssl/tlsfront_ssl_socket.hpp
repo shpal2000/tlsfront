@@ -40,6 +40,7 @@ private:
 
 private:
     bool m_ssl_init;
+    bool m_write_close_marked;
     SSL* m_ssl;
 };
 
