@@ -229,7 +229,10 @@ void tlsfront_ssl_socket::on_rstatus (int bytes_read, int read_status)
 
 void tlsfront_ssl_socket::on_error ()
 {
-    m_other_socket->abort();
+    if (m_other_socket)
+    {
+        m_other_socket->abort();
+    }
 }
 
 void tlsfront_ssl_socket::on_finish ()
