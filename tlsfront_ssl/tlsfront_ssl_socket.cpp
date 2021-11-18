@@ -153,8 +153,6 @@ void tlsfront_ssl_socket::on_write ()
 
 void tlsfront_ssl_socket::on_wstatus (int bytes_written, int write_status)
 {
-
-
     if (write_status == WRITE_STATUS_NORMAL)
     {
         ev_buff* w_buff = m_write_buff_list.front();
