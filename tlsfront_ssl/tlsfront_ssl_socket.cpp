@@ -9,6 +9,7 @@ tlsfront_ssl_socket::tlsfront_ssl_socket()
     m_ssl_init = false;
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
+    m_ssl = nullptr;
 }
 
 tlsfront_ssl_socket::~tlsfront_ssl_socket()
