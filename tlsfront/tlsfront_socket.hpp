@@ -1,15 +1,15 @@
 #ifndef __TLSFRONT_TCP_SOCKET__H
 #define __TLSFRONT_TCP_SOCKET__H
 
-#include "tlsfront_ssl_app.hpp"
+#include "tlsfront_app.hpp"
 
-class tlsfront_ssl_session;
+class tlsfront_session;
 
-class tlsfront_ssl_socket : public ev_socket
+class tlsfront_socket : public ev_socket
 {
 public:
-    tlsfront_ssl_socket();
-    virtual ~tlsfront_ssl_socket();
+    tlsfront_socket();
+    virtual ~tlsfront_socket();
     
     void on_establish ();
     void on_write ();
@@ -21,20 +21,20 @@ public:
 
 
 public:
-    tlsfront_ssl_session* m_session;
+    tlsfront_session* m_session;
 
-    tlsfront_ssl_socket* m_other_socket;
+    tlsfront_socket* m_other_socket;
 
     ev_buff* m_read_buff;
     std::queue<ev_buff*> m_write_buff_list;
     
-    tlsfront_ssl_app_ctx* m_app_ctx;
-    tlsfront_ssl_grp_ctx* m_grp_ctx;
+    tlsfront_app_ctx* m_app_ctx;
+    tlsfront_grp_ctx* m_grp_ctx;
 
 private:
     bool ssl_server_init();
     bool ssl_client_init();
-    void set_context_from(tlsfront_ssl_socket* from_sock);
+    void set_context_from(tlsfront_socket* from_sock);
     void set_context_from_parent();
     void abort_session();
 

@@ -1,10 +1,10 @@
-#include "tlsfront_ssl_app.hpp"
-#include "tlsfront_ssl_socket.hpp"
-#include "tlsfront_ssl_session.hpp"
+#include "tlsfront_app.hpp"
+#include "tlsfront_socket.hpp"
+#include "tlsfront_session.hpp"
 
 
-tlsfront_ssl_app::tlsfront_ssl_app(tlsfront_ssl_cfg* cfg
-                                    , tlsfront_ssl_stats* gstats)
+tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
+                                    , tlsfront_stats* gstats)
 {
     ev_socket::set_sockaddr (&m_app_ctx.m_front_addr
                             , cfg->front_ip.c_str()
@@ -86,7 +86,7 @@ tlsfront_ssl_app::tlsfront_ssl_app(tlsfront_ssl_cfg* cfg
         X509_free(cert);
 
         m_front_lsocket 
-            = (tlsfront_ssl_socket*) 
+            = (tlsfront_socket*) 
             new_tcp_listen (&m_app_ctx.m_front_addr
                             , 1000
                             , &m_app_ctx.m_stats_arr
@@ -129,13 +129,13 @@ tlsfront_ssl_app::tlsfront_ssl_app(tlsfront_ssl_cfg* cfg
 }
 
 
-tlsfront_ssl_app::~tlsfront_ssl_app()
+tlsfront_app::~tlsfront_app()
 {
 
 }
 
 
-void tlsfront_ssl_app::run_iter(bool tick_sec)
+void tlsfront_app::run_iter(bool tick_sec)
 {
     tlspack_app::run_iter (tick_sec);
 
@@ -145,12 +145,12 @@ void tlsfront_ssl_app::run_iter(bool tick_sec)
     }
 }
 
-ev_socket* tlsfront_ssl_app::alloc_socket()
+ev_socket* tlsfront_app::alloc_socket()
 {
-    return new tlsfront_ssl_socket();
+    return new tlsfront_socket();
 }
 
-void tlsfront_ssl_app::free_socket(ev_socket* ev_sock)
+void tlsfront_app::free_socket(ev_socket* ev_sock)
 {
     delete ev_sock;
 }

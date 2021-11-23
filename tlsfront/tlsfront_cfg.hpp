@@ -4,7 +4,7 @@
 
 #include "tlspack_app.hpp"
 
-struct tlsfront_ssl_cfg
+struct tlsfront_cfg
 {
     std::string front_ip;
     u_short front_port;

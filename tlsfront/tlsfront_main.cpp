@@ -1,5 +1,5 @@
 
-#include "tlsfront_ssl_app.hpp"
+#include "tlsfront_app.hpp"
 
 int main(int /*argc*/, char ** argv)
 {
@@ -8,8 +8,8 @@ int main(int /*argc*/, char ** argv)
     std::vector<tlspack_app*> app_list;
     std::vector<tlspack_app_stats*> stats_list;
 
-    tlsfront_ssl_cfg ssl_app_cfg;
-    tlsfront_ssl_stats ssl_app_gstats;
+    tlsfront_cfg ssl_app_cfg;
+    tlsfront_stats ssl_app_gstats;
 
     ssl_app_cfg.front_ip = argv[1];
     ssl_app_cfg.front_port = std::stoi(argv[2]);
@@ -19,8 +19,8 @@ int main(int /*argc*/, char ** argv)
 
     ssl_app_cfg.back_ip = argv[5];
     
-    tlsfront_ssl_app* tcpApp 
-        = new tlsfront_ssl_app(&ssl_app_cfg, &ssl_app_gstats);
+    tlsfront_app* tcpApp 
+        = new tlsfront_app(&ssl_app_cfg, &ssl_app_gstats);
 
     app_list.push_back(tcpApp);
     stats_list.push_back(&ssl_app_gstats);
