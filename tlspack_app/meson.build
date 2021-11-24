@@ -9,6 +9,6 @@ tlspack_applib = shared_library('tlspack_app'
                             , dependencies: [openssl, nlohmann_json_dep]
                             , link_with : [ev_socklib]
                             , include_directories : [incdirs]
-                            , install_rpath : '/rundir/lib'
-                            , install_dir : '/srcdir/imgdir/'
+                            , install_rpath : '/usr/lib'
+                            , install_dir : '/workspaces/tlsfront/deploy'
                             , install : true)

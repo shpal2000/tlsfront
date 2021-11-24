@@ -10,7 +10,7 @@ executable('tlsfront.exe'
             , dependencies: [openssl, nlohmann_json_dep]
             , include_directories : [incdirs]
             , link_with : [ev_socklib, tlspack_applib]
-            , build_rpath : '/rundir/lib'
-            , install_rpath : '/rundir/lib'
-            , install_dir : '/srcdir/imgdir/'
+            , build_rpath : '/usr/lib'
+            , install_rpath : '/usr/lib'
+            , install_dir : '/workspaces/tlsfront/deploy'
             , install : true)
