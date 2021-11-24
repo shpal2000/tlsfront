@@ -8,7 +8,7 @@ int main(int /*argc*/, char ** /*argv*/)
 {
     signal(SIGPIPE, SIG_IGN);
 
-    char* cfg_file = "/configs/config.json";
+    const char* cfg_file = "/tlsfronts/configs/config.json";
 
     std::ifstream cfg_stream(cfg_file);
     json cfg_json = json::parse(cfg_stream);
