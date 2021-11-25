@@ -1,5 +1,8 @@
 FROM ubuntu:focal
 ENV DEBIAN_FRONTEND=noninteractive
+ARG USERNAME=tlsfront
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 RUN apt-get update \
     && apt-get -yq install apt-utils \
     && apt-get -yq install mongodb \
@@ -16,7 +19,6 @@ RUN apt-get update \
     && apt-get -yq install python3-pip meson curl \
     && apt-get -yq install vim \
     && apt-get -yq install libssl-dev \
-    && apt-get -yq install libglib2.0-dev \
     && apt-get -yq install openssh-client sshpass net-tools \
     && apt-get -yq install iptables \
     #
@@ -28,15 +30,27 @@ RUN apt-get update \
     && make \
     && make install_sw \
     && echo "/usr/local/ssl/lib" > /etc/ld.so.conf.d/openssl-1.1.1d.conf \
-    && echo "/tlsfront/lib" > /etc/ld.so.conf.d/tlsfront.conf \
-    && ldconfig -v \
     && mv /usr/bin/c_rehash /usr/bin/c_rehash.BEKUP \
     && mv /usr/bin/openssl /usr/bin/openssl.BEKUP \
     && cp /usr/local/ssl/bin/c_rehash /usr/bin/c_rehash \ 
     && cp /usr/local/ssl/bin/openssl /usr/bin/openssl \
     #
+    && groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt-get install -yq sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && sudo ldconfig -v \
+    #
     && pip3 install requests pytest aiohttp pymongo \
-    && mkdir -p /tlsfront/lib \
-    && mkdir -p /tlsfront/bin \
-    && mkdir -p /tlsfront/configs
+    # Clean up
+    && apt-get autoremove -yq \
+    && apt-get clean -yq \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/local/tlsfront/lib
+COPY ./*.so /usr/local/tlsfront/lib/
+RUN echo "/usr/local/tlsfront/lib" > /etc/ld.so.conf.d/tlsfront.conf
+RUN ldconfig -v
+COPY ./*.exe /usr/local/bin/
 ENV DEBIAN_FRONTEND=
