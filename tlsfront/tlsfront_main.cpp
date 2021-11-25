@@ -8,7 +8,7 @@ int main(int /*argc*/, char ** /*argv*/)
 {
     signal(SIGPIPE, SIG_IGN);
 
-    const char* cfg_file = "/tlsfronts/configs/config.json";
+    const char* cfg_file = "/configs/config.json";
 
     std::ifstream cfg_stream(cfg_file);
     json cfg_json = json::parse(cfg_stream);
@@ -20,10 +20,10 @@ int main(int /*argc*/, char ** /*argv*/)
     tlsfront_stats app_gstats;
 
     app_cfg.front_ip = cfg_json["front_ip"].get<std::string>();
-    app_cfg.front_port = cfg_json["front_ip"].get<int>();
+    app_cfg.front_port = cfg_json["front_port"].get<int>();
 
     app_cfg.server_ip = cfg_json["server_ip"].get<std::string>();
-    app_cfg.server_port = cfg_json["server_ip"].get<int>();
+    app_cfg.server_port = cfg_json["server_port"].get<int>();
 
     app_cfg.back_ip = cfg_json["back_ip"].get<std::string>();
 
