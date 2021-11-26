@@ -8,7 +8,7 @@ data:
       "front_ip"   : "0.0.0.0",
       "front_port" : 443,
 
-      "server_ip"   : "10.22.0.226",
+      "server_ip"   : "<tbd>",
       "server_port" : 443,
       
       "back_ip"   : "0.0.0.0"
@@ -16,9 +16,11 @@ data:
   
   key.pem: |
     -----BEGIN PRIVATE KEY-----
+    <tbd>
     -----END PRIVATE KEY-----
 
   cert.pem: |
     -----BEGIN CERTIFICATE-----
+    <tbd>
     -----END CERTIFICATE-----
 
