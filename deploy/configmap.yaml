@@ -5,16 +5,16 @@ metadata:
 data:
   config.json: >
     {
-      "front_ip"   : "10.115.78.80",
+      "front_ip"   : "0.0.0.0",
       "front_port" : 443,
 
       "server_ip"   : "10.22.0.226",
       "server_port" : 443,
       
-      "back_ip"   : "10.115.78.80"
+      "back_ip"   : "0.0.0.0"
     }
   
-  cert.key: |
+  key.pem: |
     -----BEGIN PRIVATE KEY-----
     MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDR3fjuUmy2VVzD
     uHvgHw4UmJn/J3agX6maxT6Q1SeLFGC7Qz3v0Tk3cJy9W8GwCed42CnMrbcfSTF1
@@ -67,3 +67,4 @@ data:
     R+ngq8dYFgxmjJQ/S9Q82dc/MJFh4FgV2UKt1SUiRGdppuA5o9+LHAB7xYZ4faQI
     tdEq5o1qLLAva6zdiny+Rll6eYMGf0BAEo5oHokc9Wdc3FoVxQ==
     -----END CERTIFICATE-----
+

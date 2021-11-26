@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tlsfront-service
+spec:
+  type: LoadBalancer
+  externalIPs:
+  - 10.115.30.245
+  selector:
+    app: tlsfront
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443
