@@ -5,7 +5,7 @@ metadata:
 spec:
   type: LoadBalancer
   externalIPs:
-  - 10.115.30.245
+  - <tbd>
   selector:
     app: tlsfront
   ports:
