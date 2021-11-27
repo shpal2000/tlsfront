@@ -132,6 +132,8 @@ void tlsfront_socket::on_establish ()
     } 
     else
     {
+        inc_tlsfront_stats(tlsfrontSessions);
+        
         m_session->m_session_established = true;
         if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
         {

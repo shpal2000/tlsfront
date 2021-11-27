@@ -160,6 +160,8 @@ void tlsfront_app::run_iter(bool tick_sec)
         json j;
         m_stats.dump_json (j);
 
+        j["podIp"] = getenv ("MY_POD_IP");
+
         std::string s = j.dump();
 
         m_stats_sock->udp_write((const char*)s.c_str(), s.length()+1);

@@ -7,15 +7,13 @@ class tlsfront_socket;
 
 struct tlsfront_stats_data : tlspack_app_stats
 {
-    uint64_t tlsfront_stats_1;
-    uint64_t tlsfront_stats_100;
+    uint64_t tlsfrontSessions;
 
     virtual void dump_json (json &j)
     {
-        tlspack_app_stats::dump_json (j);
+        // tlspack_app_stats::dump_json (j);
         
-        j["tlsfront_stats_1"] = tlsfront_stats_1;
-        j["tlsfront_stats_100"] = tlsfront_stats_100;
+        j["tlsfrontSessions"] = tlsfrontSessions;
     }
 
     virtual ~tlsfront_stats_data() {};
