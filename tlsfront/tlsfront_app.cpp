@@ -18,6 +18,10 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
                             , cfg->back_ip.c_str()
                             , 0);
 
+    ev_socket::set_sockaddr (&m_app_ctx.m_stats_addr
+                            , cfg->stats_ip.c_str()
+                            , htons(cfg->stats_port));
+
     m_app_ctx.m_sock_opt.rcv_buff_len = 0;
     m_app_ctx.m_sock_opt.snd_buff_len = 0;
 
@@ -120,6 +124,9 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
         SSL_CTX_set_dh_auto(m_grp_ctx.m_s_ssl_ctx, 1);
     }
 
+    m_stats_sock 
+        = (tlsfront_socket*) new_udp_client (nullptr, &m_app_ctx.m_stats_addr);
+
     if (m_grp_ctx.m_s_ssl_ctx 
         && m_grp_ctx.m_c_ssl_ctx 
         && m_front_lsocket)
@@ -142,12 +149,19 @@ void tlsfront_app::run_iter(bool tick_sec)
     if (tick_sec)
     {
         m_stats.tick_sec();
+
+        json j;
+        m_stats.dump_json (j);
+
+        std::string s = j.dump();
+
+        m_stats_sock->udp_write((const char*)s.c_str(), s.length()+1);
     }
 }
 
-ev_socket* tlsfront_app::alloc_socket()
+ev_socket* tlsfront_app::alloc_socket(bool is_udp)
 {
-    return new tlsfront_socket();
+    return new tlsfront_socket(is_udp);
 }
 
 void tlsfront_app::free_socket(ev_socket* ev_sock)

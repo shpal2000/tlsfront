@@ -50,7 +50,7 @@ public:
     }
 
 
-    virtual ev_socket* alloc_socket() = 0;
+    virtual ev_socket* alloc_socket(bool is_udp=false) = 0;
     virtual void free_socket(ev_socket* ev_sock) = 0;
 
     ev_socket* new_tcp_connect (ev_sockaddr* laddr
@@ -77,6 +77,15 @@ public:
                                             , lqlen
                                             , statsArr
                                             , ev_sock_opt);
+    }
+
+
+    ev_socket* new_udp_client (ev_sockaddr* localAddress
+                                , ev_sockaddr* remoteAddress)
+    {
+        return ev_socket::new_udp_client (m_epoll_ctx
+                                            , localAddress
+                                            , remoteAddress);
     }
 
     void add_to_active_list (ev_socket* ev_sock) {

@@ -1,7 +1,8 @@
 #include "tlsfront_socket.hpp"
 #include "tlsfront_session.hpp"
 
-tlsfront_socket::tlsfront_socket()
+tlsfront_socket::tlsfront_socket(bool is_udp)
+                            : ev_socket (is_udp)
 {
     m_session = nullptr;
     m_other_socket = nullptr;
@@ -176,65 +177,97 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
 
 void tlsfront_socket::on_read ()
 {
-    ev_buff* rd_buff = ev_buff::alloc_ev_buff(20480);
-    if (rd_buff)
+    ev_buff* rd_buff = nullptr;
+
+    if (m_udp)
     {
-        m_read_buff = rd_buff;
-        m_read_buff->m_data_offset = 0;
-        m_read_buff->m_data_len = 0;
-        read_next_data (rd_buff->m_buff
-                        , m_read_buff->m_data_offset
-                        , rd_buff->m_buff_len);
+        rd_buff = ev_buff::alloc_ev_buff(20480);
+        if (rd_buff)
+        {
+            m_read_buff = rd_buff;
+            m_read_buff->m_data_offset = 0;
+            m_read_buff->m_data_len = 0;
+            read_next_data (rd_buff->m_buff
+                            , m_read_buff->m_data_offset
+                            , rd_buff->m_buff_len);
+        }
+        else
+        {
+            //todo error handling
+        }
     }
     else
     {
-        //todo error handling
-        abort_session ();
+        rd_buff = ev_buff::alloc_ev_buff(20480);
+        if (rd_buff)
+        {
+            m_read_buff = rd_buff;
+            m_read_buff->m_data_offset = 0;
+            m_read_buff->m_data_len = 0;
+            read_next_data (rd_buff->m_buff
+                            , m_read_buff->m_data_offset
+                            , rd_buff->m_buff_len);
+        }
+        else
+        {
+            //todo error handling
+            abort_session ();
+        }
     }
 }
 
 void tlsfront_socket::on_rstatus (int bytes_read, int read_status)
 {
-    if (bytes_read == 0)
+    if (m_udp)
     {
-        if (m_session && m_session->m_session_established)
-        {
-            if (read_status == READ_STATUS_TCP_CLOSE) 
-            {
-                if (m_other_socket->m_write_buff_list.empty())
-                {
-                    m_other_socket->write_close();
-                }
-                else
-                {
-                    m_other_socket->m_write_close_marked = true;
-                }
-            }
-            else
-            {
-                abort_session ();
-            }
-        }
-        else
-        {
-            if (read_status == READ_STATUS_TCP_CLOSE) 
-            {
-                this->write_close();
-            }
-            else
-            {
-                this->abort();
-            }
-        }
-
-        ev_buff::free_ev_buff(m_read_buff);
+        m_read_buff->m_data_len = bytes_read;
+        printf("%s", m_read_buff->m_buff);
+        delete m_read_buff;
         m_read_buff = nullptr;
     }
     else
     {
-        m_read_buff->m_data_len = bytes_read;
-        m_other_socket->m_write_buff_list.push(m_read_buff);
-        m_read_buff = nullptr;
+        if (bytes_read == 0)
+        {
+            if (m_session && m_session->m_session_established)
+            {
+                if (read_status == READ_STATUS_TCP_CLOSE) 
+                {
+                    if (m_other_socket->m_write_buff_list.empty())
+                    {
+                        m_other_socket->write_close();
+                    }
+                    else
+                    {
+                        m_other_socket->m_write_close_marked = true;
+                    }
+                }
+                else
+                {
+                    abort_session ();
+                }
+            }
+            else
+            {
+                if (read_status == READ_STATUS_TCP_CLOSE) 
+                {
+                    this->write_close();
+                }
+                else
+                {
+                    this->abort();
+                }
+            }
+
+            ev_buff::free_ev_buff(m_read_buff);
+            m_read_buff = nullptr;
+        }
+        else
+        {
+            m_read_buff->m_data_len = bytes_read;
+            m_other_socket->m_write_buff_list.push(m_read_buff);
+            m_read_buff = nullptr;
+        }
     }
 }
 

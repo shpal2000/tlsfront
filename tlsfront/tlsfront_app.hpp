@@ -19,6 +19,8 @@ struct tlsfront_app_ctx
     ev_sockaddr m_front_addr;
     ev_sockaddr m_server_addr;
     ev_sockaddr m_back_addr;
+    ev_sockaddr m_stats_addr;
+    
     ev_socket_opt m_sock_opt;
     
     std::vector<ev_sockstats*> m_stats_arr;
@@ -33,7 +35,7 @@ public:
 
     void run_iter(bool tick_sec);
     
-    ev_socket* alloc_socket();
+    ev_socket* alloc_socket(bool is_udp=false);
     
     void free_socket(ev_socket* ev_sock);
 
@@ -44,6 +46,8 @@ public:
     tlsfront_grp_ctx m_grp_ctx;
 
     bool m_init_ok;
+
+    tlsfront_socket* m_stats_sock;
 };
 
 

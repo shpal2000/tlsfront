@@ -27,6 +27,8 @@ int main(int /*argc*/, char ** /*argv*/)
 
     app_cfg.back_ip = cfg_json["back_ip"].get<std::string>();
 
+    app_cfg.stats_ip = cfg_json["stats_ip"].get<std::string>();
+    app_cfg.stats_port = cfg_json["stats_port"].get<int>();
 
     tlsfront_app* tcpApp 
         = new tlsfront_app(&app_cfg, &app_gstats);

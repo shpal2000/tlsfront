@@ -8,7 +8,7 @@ class tlsfront_session;
 class tlsfront_socket : public ev_socket
 {
 public:
-    tlsfront_socket();
+    tlsfront_socket(bool is_udp=false);
     virtual ~tlsfront_socket();
     
     void on_establish ();

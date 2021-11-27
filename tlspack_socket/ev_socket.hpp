@@ -336,9 +336,10 @@ public:
     ev_socket* m_next;
     ev_socket* m_prev;
     ev_app* m_app;
+    bool m_udp;
 
 public:
-    ev_socket();
+    ev_socket(bool is_udp=false);
     virtual ~ev_socket();
 
     virtual void on_establish () = 0;
@@ -527,6 +528,11 @@ public:
                                         , std::vector<ev_sockstats*>* statsArr
                                         , ev_socket_opt* ev_sock_opt);
 
+    
+    static ev_socket* new_udp_client (epoll_ctx* epoll_ctxp
+                                        , ev_sockaddr* localAddress
+                                        , ev_sockaddr* remoteAddress);
+
     void read_next_data (char* readBuffer
                             , int readBuffOffset
                             , int readDataLen);
@@ -538,6 +544,9 @@ public:
     void write_close (int send_close_notify=0);
     void abort ();
 
+    
+    int udp_write (const char* dataBuffer, int dataLen);
+
 
 
 private:
@@ -545,6 +554,11 @@ private:
     int tcp_connect (epoll_ctx* epoll_ctxp
                     , ev_sockaddr* localAddress
                     , ev_sockaddr* remoteAddress);
+
+    int udp_connect (epoll_ctx* epoll_ctxp
+                    , ev_sockaddr* localAddress
+                    , ev_sockaddr* remoteAddress);
+
     
     int tcp_listen (epoll_ctx* epoll_ctxp
                     , ev_sockaddr* localAddress
@@ -561,6 +575,9 @@ private:
     int ssl_write (const char* dataBuffer, int dataLen);
     void ssl_shutdown ();
     
+    int udp_read (char* dataBuffer, int dataLen);
+    void udp_close ();
+
     ///////////////////////////////helper functions/////////////////////////
     void close_socket ();
     void tcp_connection_success ();

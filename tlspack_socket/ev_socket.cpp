@@ -30,9 +30,10 @@ void ev_socket::init ()
     m_app = nullptr;
 }
 
-ev_socket::ev_socket()
+ev_socket::ev_socket(bool is_udp)
 {
     init ();
+    m_udp = is_udp;
 }
 
 ev_socket::~ev_socket()
@@ -100,6 +101,19 @@ ev_socket* ev_socket::new_tcp_listen (epoll_ctx* epoll_ctxp
 
     }
     
+    return new_sock;
+}
+
+ev_socket* ev_socket::new_udp_client (epoll_ctx* epoll_ctxp
+                                        , ev_sockaddr* localAddress
+                                        , ev_sockaddr* remoteAddress)
+{
+    ev_socket* new_sock = epoll_ctxp->m_app->alloc_socket(true);
+
+    new_sock->udp_connect (epoll_ctxp
+                            , localAddress
+                            , remoteAddress);
+
     return new_sock;
 }
 
@@ -465,6 +479,129 @@ int ev_socket::tcp_connect (epoll_ctx* epoll_ctxp
     return ret_status;
 }
 
+int ev_socket::udp_connect (epoll_ctx* epoll_ctxp
+                            , ev_sockaddr* localAddress
+                            , ev_sockaddr* remoteAddress)
+{
+    //socket stats
+    // inc_stats (tcpConnInit);
+    // inc_stats (tcpConnInitInUse);
+    // inc_stats (tcpConnInitInSec);
+
+    //socket contexts
+    m_epoll_ctx = epoll_ctxp;
+    if (localAddress)
+    {
+        std::memcpy (&m_local_addr, localAddress, sizeof (ev_sockaddr));
+    }
+    else{
+        std::memset(&m_local_addr, 0, sizeof (ev_sockaddr));
+    }
+    std::memcpy (&m_remote_addr, remoteAddress, sizeof (ev_sockaddr));
+
+    //socket if ipv6
+    struct sockaddr* uaddr = (struct sockaddr*) (localAddress);
+    m_ipv6 = (uaddr->sa_family == AF_INET6);
+
+    //create socket
+    if (m_ipv6){
+        m_fd = socket(AF_INET6 , SOCK_DGRAM | SOCK_NONBLOCK , 0);
+    }else{
+        m_fd = socket(AF_INET , SOCK_DGRAM | SOCK_NONBLOCK , 0);
+    }
+
+    if (m_fd == -1) 
+    {
+        inc_stats (socketCreateFail);
+        set_error_state (STATE_TCP_SOCK_CREATE_FAIL);
+    }
+    else
+    {
+        // inc_stats (socketCreate);
+        // set_state (STATE_TCP_SOCK_CREATE);
+
+        //socket bind
+        int bind_status = -1;
+        if (m_ipv6)
+        {
+            bind_status = bind(m_fd
+                                , (struct sockaddr*)&m_local_addr
+                                , sizeof(struct sockaddr_in6));
+        }
+        else
+        {
+            bind_status = bind(m_fd
+                                , (struct sockaddr*)&m_local_addr
+                                , sizeof(struct sockaddr_in));
+        }
+
+        if (bind_status == -1)
+        {
+            if (m_ipv6)
+            {
+                inc_stats (socketBindIpv6Fail);
+            }
+            else
+            {
+                inc_stats (socketBindIpv4Fail);
+            }
+            set_error_state (STATE_TCP_SOCK_BIND_FAIL);
+        }
+        else
+        {
+            if (m_ipv6)
+            {
+                inc_stats (socketBindIpv6);
+            }
+            else
+            {
+                inc_stats (socketBindIpv4);
+            }
+            set_state (STATE_TCP_SOCK_BIND);
+
+            //socket connect
+            int connect_status = -1;
+            if (m_ipv6)
+            {
+                connect_status = connect(m_fd
+                                        , (struct sockaddr*)&m_remote_addr
+                                        , sizeof(struct sockaddr_in6));
+            }
+            else
+            {
+                connect_status = connect(m_fd
+                                        , (struct sockaddr*)&m_remote_addr
+                                        , sizeof(struct sockaddr_in));
+            }
+            set_state (STATE_TCP_CONN_INIT);
+
+            if (connect_status < 0)
+            {
+                set_error_state (STATE_TCP_SOCK_CONNECT_FAIL_IMMEDIATE);
+            }
+        }
+    }
+
+    int ret_status = 0;
+    if ( get_error_state ())
+    {
+        ret_status = -1;
+        // inc_stats (tcpConnInitFail);
+        // dec_stats (tcpConnInitInUse);
+
+        if (m_fd != -1){
+            tcp_close();
+        }
+    }
+    else
+    {
+        //socket status
+        enable_rd_only_notification ();
+    }
+
+    return ret_status;
+}
+
 int ev_socket::tcp_listen(epoll_ctx* epoll_ctxp
                             , ev_sockaddr* localAddress
                             , int listenQLen)
@@ -654,8 +791,17 @@ void ev_socket::tcp_verify_established ()
     }
 }
 
-void ev_socket::tcp_close (int isLinger, int lingerTime) {
+void ev_socket::udp_close ()
+{
+    if ( close (m_fd) ) {
+        set_error_state (STATE_TCP_SOCK_FD_CLOSE_FAIL);
+    } else {
+        set_state (STATE_TCP_SOCK_FD_CLOSE);
+    }
+}
 
+void ev_socket::tcp_close (int isLinger, int lingerTime) 
+{
     if (isLinger) {
         struct linger sl;
         sl.l_onoff = 1;
@@ -712,6 +858,13 @@ int ev_socket::tcp_write (const char* dataBuffer, int dataLen)
     return bytesSent;
 }
 
+int ev_socket::udp_write (const char* dataBuffer, int dataLen)
+{
+    int bytesSent = write(m_fd, dataBuffer, dataLen);
+
+    return bytesSent;
+}
+
 int ev_socket::tcp_read (char* dataBuffer, int dataLen)
 {
     int bytesRead = read(m_fd, dataBuffer, dataLen);
@@ -737,6 +890,13 @@ int ev_socket::tcp_read (char* dataBuffer, int dataLen)
             inc_stats (tcpReadFail);
         }
     }
+
+    return bytesRead;
+}
+
+int ev_socket::udp_read (char* dataBuffer, int dataLen)
+{
+    int bytesRead = read(m_fd, dataBuffer, dataLen);
 
     return bytesRead;
 }
@@ -1098,45 +1258,54 @@ void ev_socket::do_close_connection ()
 bool ev_socket::do_read_next_data ()
 {
     int bytes_received;
-    if ( is_set_state (STATE_SSL_ENABLED_CONN) ) {
-        bytes_received  
-            = ssl_read ( m_read_buffer + m_read_buff_offset
-                        , m_read_data_len);
-    } else {
-        bytes_received  
-            = tcp_read ( m_read_buffer + m_read_buff_offset
-                        , m_read_data_len);
-    }
-
     bool notify_read_status = true;
 
-    if ( get_error_state() ) 
+    if (m_udp)
     {
-        switch ( get_sys_errno() ) 
-        {
-            case ETIMEDOUT:
-                m_read_status = READ_STATUS_TCP_TIMEOUT; 
-                break;
-            case ECONNRESET:
-                m_read_status = READ_STATUS_TCP_RESET;
-                break;
-            default:
-                m_read_status  = READ_STATUS_ERROR;
-                break;
-        }
-        do_close_connection ();
-    } 
+        bytes_received  
+            = udp_read ( m_read_buffer + m_read_buff_offset
+                        , m_read_data_len);
+    }
     else
     {
-        if (bytes_received <= 0) {
-            if ( is_set_state (STATE_TCP_REMOTE_CLOSED) ) 
+        if ( is_set_state (STATE_SSL_ENABLED_CONN) ) {
+            bytes_received  
+                = ssl_read ( m_read_buffer + m_read_buff_offset
+                            , m_read_data_len);
+        } else {
+            bytes_received  
+                = tcp_read ( m_read_buffer + m_read_buff_offset
+                            , m_read_data_len);
+        }
+
+        if ( get_error_state() ) 
+        {
+            switch ( get_sys_errno() ) 
             {
-                m_read_status = READ_STATUS_TCP_CLOSE;
-            } 
-            else
-            {
-                // ssl want read write; EAGAIN; skip;
-                notify_read_status = false;
+                case ETIMEDOUT:
+                    m_read_status = READ_STATUS_TCP_TIMEOUT; 
+                    break;
+                case ECONNRESET:
+                    m_read_status = READ_STATUS_TCP_RESET;
+                    break;
+                default:
+                    m_read_status  = READ_STATUS_ERROR;
+                    break;
+            }
+            do_close_connection ();
+        } 
+        else
+        {
+            if (bytes_received <= 0) {
+                if ( is_set_state (STATE_TCP_REMOTE_CLOSED) ) 
+                {
+                    m_read_status = READ_STATUS_TCP_CLOSE;
+                } 
+                else
+                {
+                    // ssl want read write; EAGAIN; skip;
+                    notify_read_status = false;
+                }
             }
         }
     }
@@ -1214,100 +1383,125 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
             epoll_event* eventp = &(epoll_ctxp->m_epoll_event_arr[eindex]);
             ev_socket* sockp = (ev_socket*) eventp->data.ptr;
             uint32_t events = eventp->events;
-            //handle tcp accept
-            if ( sockp->is_set_state (STATE_TCP_LISTENING) )
+
+            if (sockp->m_udp)
             {
-                sockp->handle_tcp_accept ();
-            } 
+                if (events & EPOLLIN)
+                {
+                    bool continue_read = false;
+                    do 
+                    {
+                        if ((sockp->is_set_state(STATE_CONN_READ_PENDING)==0)
+                            && (sockp->is_fd_closed() == false))
+                        {
+                            sockp->on_read();
+                        }
+
+                        if (sockp->is_set_state(STATE_CONN_READ_PENDING)
+                            && (sockp->is_fd_closed() == false))
+                        {
+                            continue_read = sockp->do_read_next_data ();
+                        }
+                    } while(continue_read);
+                }
+            }
             else
             {
-                //handle tcp connect
-                if ( (sockp->get_status() 
-                            == CONNAPP_STATE_CONNECTION_IN_PROGRESS)
-                            && (events & EPOLLOUT) )
+                //handle tcp accept
+                if ( sockp->is_set_state (STATE_TCP_LISTENING) )
                 {
-                    sockp->handle_tcp_connect_complete ();
-                }
-                //handle ssl handshake
-                else if ( sockp->get_status() 
-                            == CONNAPP_STATE_SSL_CONNECTION_IN_PROGRESS )
+                    sockp->handle_tcp_accept ();
+                } 
+                else
                 {
-                    bool doSslHandshake = false;
-
-                    if ( sockp->is_set_state(STATE_SSL_HANDSHAKE_WANT_WRITE)
-                        && (events & EPOLLOUT) ) 
+                    //handle tcp connect
+                    if ( (sockp->get_status() 
+                                == CONNAPP_STATE_CONNECTION_IN_PROGRESS)
+                                && (events & EPOLLOUT) )
                     {
-                        doSslHandshake = true;
-                        sockp->clear_state (STATE_SSL_HANDSHAKE_WANT_WRITE);
+                        sockp->handle_tcp_connect_complete ();
                     }
-
-                    if ( sockp->is_set_state(STATE_SSL_HANDSHAKE_WANT_READ)
-                        && (events & EPOLLIN) ) 
+                    //handle ssl handshake
+                    else if ( sockp->get_status() 
+                                == CONNAPP_STATE_SSL_CONNECTION_IN_PROGRESS )
                     {
-                        doSslHandshake = true;
-                        sockp->clear_state (STATE_SSL_HANDSHAKE_WANT_READ);
-                    }
+                        bool doSslHandshake = false;
 
-                    if (doSslHandshake) {
-                        sockp->do_ssl_handshake ();
-                    }
-                }
-                //handle read, write both ssl and non-ssl tcp
-                else if ( (sockp->get_status()
-                            == CONNAPP_STATE_SSL_CONNECTION_ESTABLISHED) ||
-                            ( (sockp->get_status()
-                            == CONNAPP_STATE_CONNECTION_ESTABLISHED) && 
-                            (sockp->is_set_state(STATE_SSL_ENABLED_CONN)== 0)) )
-                {
-                    //handle read
-                    if (events & EPOLLIN)
-                    {
-                        bool continue_read = false;
-                        do 
+                        if ( sockp->is_set_state(STATE_SSL_HANDSHAKE_WANT_WRITE)
+                            && (events & EPOLLOUT) ) 
                         {
-                            if ((sockp->is_set_state(STATE_CONN_READ_PENDING)==0)
+                            doSslHandshake = true;
+                            sockp->clear_state (STATE_SSL_HANDSHAKE_WANT_WRITE);
+                        }
+
+                        if ( sockp->is_set_state(STATE_SSL_HANDSHAKE_WANT_READ)
+                            && (events & EPOLLIN) ) 
+                        {
+                            doSslHandshake = true;
+                            sockp->clear_state (STATE_SSL_HANDSHAKE_WANT_READ);
+                        }
+
+                        if (doSslHandshake) {
+                            sockp->do_ssl_handshake ();
+                        }
+                    }
+                    //handle read, write both ssl and non-ssl tcp
+                    else if ( (sockp->get_status()
+                                == CONNAPP_STATE_SSL_CONNECTION_ESTABLISHED) ||
+                                ( (sockp->get_status()
+                                == CONNAPP_STATE_CONNECTION_ESTABLISHED) && 
+                                (sockp->is_set_state(STATE_SSL_ENABLED_CONN)== 0)) )
+                    {
+                        //handle read
+                        if (events & EPOLLIN)
+                        {
+                            bool continue_read = false;
+                            do 
+                            {
+                                if ((sockp->is_set_state(STATE_CONN_READ_PENDING)==0)
+                                    && (sockp->is_fd_closed() == false))
+                                {
+                                    sockp->on_read();
+                                }
+
+                                if (sockp->is_set_state(STATE_CONN_READ_PENDING)
+                                    && (sockp->is_fd_closed() == false))
+                                {
+                                    continue_read = sockp->do_read_next_data ();
+                                }
+                            } while(continue_read);
+                        }
+
+                        //handle write
+                        if (events & EPOLLOUT)
+                        {
+                            if ((sockp->is_set_state(STATE_CONN_WRITE_PENDING)==0)
                                 && (sockp->is_fd_closed() == false))
                             {
-                                sockp->on_read();
+                                if (sockp->is_set_state(STATE_NO_MORE_WRITE_DATA))
+                                {
+                                    sockp->do_close_connection ();
+                                }
+                                else
+                                {
+                                    sockp->on_write();
+                                }
                             }
 
-                            if (sockp->is_set_state(STATE_CONN_READ_PENDING)
+                            if (sockp->is_set_state(STATE_CONN_WRITE_PENDING)
                                 && (sockp->is_fd_closed() == false))
                             {
-                                continue_read = sockp->do_read_next_data ();
-                            }
-                        } while(continue_read);
-                    }
-
-                    //handle write
-                    if (events & EPOLLOUT)
-                    {
-                        if ((sockp->is_set_state(STATE_CONN_WRITE_PENDING)==0)
-                            && (sockp->is_fd_closed() == false))
-                        {
-                            if (sockp->is_set_state(STATE_NO_MORE_WRITE_DATA))
-                            {
-                                sockp->do_close_connection ();
-                            }
-                            else
-                            {
-                                sockp->on_write();
+                                sockp->do_write_next_data ();
                             }
                         }
 
-                        if (sockp->is_set_state(STATE_CONN_WRITE_PENDING)
-                            && (sockp->is_fd_closed() == false))
+                        if ( (sockp->is_fd_closed() == false)
+                                && sockp->is_set_state(STATE_TCP_REMOTE_CLOSED)
+                                && (sockp->is_set_state(STATE_TCP_SENT_FIN)
+                                    ||(sockp->is_set_error_state(STATE_TCP_FIN_SEND_FAIL))) )
                         {
-                            sockp->do_write_next_data ();
+                            sockp->do_close_connection ();
                         }
-                    }
-
-                    if ( (sockp->is_fd_closed() == false)
-                            && sockp->is_set_state(STATE_TCP_REMOTE_CLOSED)
-                            && (sockp->is_set_state(STATE_TCP_SENT_FIN)
-                                ||(sockp->is_set_error_state(STATE_TCP_FIN_SEND_FAIL))) )
-                    {
-                        sockp->do_close_connection ();
                     }
                 }
             }
