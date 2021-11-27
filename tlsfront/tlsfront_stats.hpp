@@ -11,7 +11,7 @@ struct tlsfront_stats_data : tlspack_app_stats
 
     virtual void dump_json (json &j)
     {
-        // tlspack_app_stats::dump_json (j);
+        tlspack_app_stats::dump_json (j);
         
         j["tlsfrontSessions"] = tlsfrontSessions;
     }
