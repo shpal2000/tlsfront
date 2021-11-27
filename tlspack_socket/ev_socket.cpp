@@ -106,15 +106,26 @@ ev_socket* ev_socket::new_tcp_listen (epoll_ctx* epoll_ctxp
 
 ev_socket* ev_socket::new_udp_client (epoll_ctx* epoll_ctxp
                                         , ev_sockaddr* localAddress
-                                        , ev_sockaddr* remoteAddress)
+                                        , ev_sockaddr* remoteAddress
+                                        , std::vector<ev_sockstats*>* statsArr)
 {
     ev_socket* new_sock = epoll_ctxp->m_app->alloc_socket(true);
 
-    new_sock->udp_connect (epoll_ctxp
-                            , localAddress
-                            , remoteAddress);
+    if (new_sock) {
+        new_sock->m_app = epoll_ctxp->m_app;
+        new_sock->set_sockstats_arr (statsArr);
+        new_sock->udp_connect (epoll_ctxp
+                                , localAddress
+                                , remoteAddress);
+    }
 
     return new_sock;
+}
+
+void ev_socket::free_udp_client (ev_socket* ev_sock_ptr)
+{
+    ev_sock_ptr->udp_close();
+    ev_sock_ptr->m_app->free_socket (ev_sock_ptr);
 }
 
 void ev_socket::enable_rd_only_notification () 

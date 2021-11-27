@@ -81,11 +81,13 @@ public:
 
 
     ev_socket* new_udp_client (ev_sockaddr* localAddress
-                                , ev_sockaddr* remoteAddress)
+                                , ev_sockaddr* remoteAddress
+                                , std::vector<ev_sockstats*>* statsArr)
     {
         return ev_socket::new_udp_client (m_epoll_ctx
                                             , localAddress
-                                            , remoteAddress);
+                                            , remoteAddress
+                                            , statsArr);
     }
 
     void add_to_active_list (ev_socket* ev_sock) {

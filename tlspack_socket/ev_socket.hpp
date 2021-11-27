@@ -530,8 +530,11 @@ public:
 
     
     static ev_socket* new_udp_client (epoll_ctx* epoll_ctxp
-                                        , ev_sockaddr* localAddress
-                                        , ev_sockaddr* remoteAddress);
+                                    , ev_sockaddr* localAddress
+                                    , ev_sockaddr* remoteAddress
+                                    , std::vector<ev_sockstats*>* statsArr);
+
+    static void free_udp_client (ev_socket* ev_sock_ptr);
 
     void read_next_data (char* readBuffer
                             , int readBuffOffset
@@ -544,7 +547,7 @@ public:
     void write_close (int send_close_notify=0);
     void abort ();
 
-    
+
     int udp_write (const char* dataBuffer, int dataLen);
 
 

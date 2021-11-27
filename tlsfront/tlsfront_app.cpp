@@ -125,11 +125,14 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
     }
 
     m_stats_sock 
-        = (tlsfront_socket*) new_udp_client (nullptr, &m_app_ctx.m_stats_addr);
+        = (tlsfront_socket*) new_udp_client (nullptr
+                                            , &m_app_ctx.m_stats_addr
+                                            , &m_app_ctx.m_stats_arr);
 
     if (m_grp_ctx.m_s_ssl_ctx 
         && m_grp_ctx.m_c_ssl_ctx 
-        && m_front_lsocket)
+        && m_front_lsocket
+        && m_stats_sock)
     {
         m_init_ok = true;
     }
@@ -138,7 +141,11 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
 
 tlsfront_app::~tlsfront_app()
 {
-
+    if (m_stats_sock)
+    {
+        ev_socket::free_udp_client(m_stats_sock);
+        m_stats_sock = nullptr;
+    }
 }
 
 
