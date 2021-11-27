@@ -500,7 +500,7 @@ int ev_socket::udp_connect (epoll_ctx* epoll_ctxp
     std::memcpy (&m_remote_addr, remoteAddress, sizeof (ev_sockaddr));
 
     //socket if ipv6
-    struct sockaddr* uaddr = (struct sockaddr*) (localAddress);
+    struct sockaddr* uaddr = (struct sockaddr*) (&m_local_addr);
     m_ipv6 = (uaddr->sa_family == AF_INET6);
 
     //create socket
