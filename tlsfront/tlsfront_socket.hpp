@@ -27,6 +27,7 @@ public:
 
     ev_buff* m_read_buff;
     std::queue<ev_buff*> m_write_buff_list;
+    std::queue<ev_buff*> m_udp_buff_list;
     
     tlsfront_app_ctx* m_app_ctx;
     tlsfront_grp_ctx* m_grp_ctx;

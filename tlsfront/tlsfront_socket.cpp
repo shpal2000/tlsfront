@@ -144,41 +144,68 @@ void tlsfront_socket::on_establish ()
 
 void tlsfront_socket::on_write ()
 {
-    if (!m_write_buff_list.empty())
+    if (m_udp)
     {
-        ev_buff* w_buff = m_write_buff_list.front();
+        if (!m_udp_buff_list.empty())
+        {
+            ev_buff* w_buff = m_udp_buff_list.front();
 
-        write_next_data (w_buff->m_buff
-                        , w_buff->m_data_offset
-                        , w_buff->m_data_len - w_buff->m_data_offset);
+            write_next_data (w_buff->m_buff
+                            , w_buff->m_data_offset
+                            , w_buff->m_data_len - w_buff->m_data_offset);
+        }
+    }
+    else
+    {
+        if (!m_write_buff_list.empty())
+        {
+            ev_buff* w_buff = m_write_buff_list.front();
+
+            write_next_data (w_buff->m_buff
+                            , w_buff->m_data_offset
+                            , w_buff->m_data_len - w_buff->m_data_offset);
+        }
     }
 }
 
 void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
 {
-    if (write_status == WRITE_STATUS_NORMAL)
+    if (m_udp)
     {
-        ev_buff* w_buff = m_write_buff_list.front();
-
-        m_app_ctx->m_monitor_sock->udp_write(
-                                w_buff->m_buff + w_buff->m_data_offset
-                                , bytes_written);
-
-        w_buff->m_data_offset += bytes_written;
-        if (w_buff->m_data_offset == w_buff->m_data_len)
+        if (bytes_written > 0)
         {
-            m_write_buff_list.pop();
-            ev_buff::free_ev_buff(w_buff);
+            ev_buff* w_buff = m_udp_buff_list.front();
+            w_buff->m_data_offset += bytes_written;
 
-            if (m_write_buff_list.empty() && m_write_close_marked)
+            if (w_buff->m_data_offset == w_buff->m_data_len)
             {
-                this->write_close();
+                m_udp_buff_list.pop();
+                ev_buff::free_ev_buff(w_buff);
             }
         }
     }
     else
     {
-        abort_session ();
+        if (write_status == WRITE_STATUS_NORMAL)
+        {
+            ev_buff* w_buff = m_write_buff_list.front();
+
+            w_buff->m_data_offset += bytes_written;
+            if (w_buff->m_data_offset == w_buff->m_data_len)
+            {
+                m_write_buff_list.pop();
+                m_app_ctx->m_monitor_sock->m_udp_buff_list.push(w_buff);
+
+                if (m_write_buff_list.empty() && m_write_close_marked)
+                {
+                    this->write_close();
+                }
+            }
+        }
+        else
+        {
+            abort_session ();
+        }
     }
 }
 

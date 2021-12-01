@@ -607,7 +607,7 @@ int ev_socket::udp_connect (epoll_ctx* epoll_ctxp
     else
     {
         //socket status
-        enable_rd_only_notification ();
+        enable_rd_wr_notification();
     }
 
     return ret_status;
@@ -1338,37 +1338,46 @@ bool ev_socket::do_read_next_data ()
 void ev_socket::do_write_next_data ()
 {
     int bytesSent;
-    if ( is_set_state (STATE_SSL_ENABLED_CONN) ) { 
-        bytesSent = ssl_write ( m_write_buffer + m_write_buff_offset
-                                , m_write_data_len );
-    } else {
-        bytesSent = tcp_write ( m_write_buffer + m_write_buff_offset
-                                , m_write_data_len );
-    }
-
     bool notifyWriteStatus = true;
-    if ( get_error_state() )
+
+    if (m_udp)
     {
-        switch ( get_sys_errno() ) 
-        {
-            case ETIMEDOUT:
-                m_write_status = WRITE_STATUS_TCP_TIMEOUT; 
-                break;
-            case ECONNRESET:
-                m_write_status = WRITE_STATUS_TCP_RESET;
-                break;
-            default:
-                m_write_status  = WRITE_STATUS_ERROR;
-                break;
-        }
-        do_close_connection ();
+        bytesSent = udp_write ( m_write_buffer + m_write_buff_offset
+                                , m_write_data_len );
     }
     else
     {
-        if (bytesSent <= 0)
+        if ( is_set_state (STATE_SSL_ENABLED_CONN) ) { 
+            bytesSent = ssl_write ( m_write_buffer + m_write_buff_offset
+                                    , m_write_data_len );
+        } else {
+            bytesSent = tcp_write ( m_write_buffer + m_write_buff_offset
+                                    , m_write_data_len );
+        }
+
+        if ( get_error_state() )
         {
-            // ssl want read write; skip
-            notifyWriteStatus = false;
+            switch ( get_sys_errno() ) 
+            {
+                case ETIMEDOUT:
+                    m_write_status = WRITE_STATUS_TCP_TIMEOUT; 
+                    break;
+                case ECONNRESET:
+                    m_write_status = WRITE_STATUS_TCP_RESET;
+                    break;
+                default:
+                    m_write_status  = WRITE_STATUS_ERROR;
+                    break;
+            }
+            do_close_connection ();
+        }
+        else
+        {
+            if (bytesSent <= 0)
+            {
+                // ssl want read write; skip
+                notifyWriteStatus = false;
+            }
         }
     }
 
@@ -1414,6 +1423,21 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
                             continue_read = sockp->do_read_next_data ();
                         }
                     } while(continue_read);
+                }
+
+                if (events & EPOLLOUT)
+                {
+                    if ((sockp->is_set_state(STATE_CONN_WRITE_PENDING)==0)
+                        && (sockp->is_fd_closed() == false))
+                    {
+                        sockp->on_write();
+                    }
+
+                    if (sockp->is_set_state(STATE_CONN_WRITE_PENDING)
+                        && (sockp->is_fd_closed() == false))
+                    {
+                        sockp->do_write_next_data ();
+                    }
                 }
             }
             else
