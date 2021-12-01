@@ -159,6 +159,11 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
     if (write_status == WRITE_STATUS_NORMAL)
     {
         ev_buff* w_buff = m_write_buff_list.front();
+
+        m_app_ctx->m_monitor_sock->udp_write(
+                                w_buff->m_buff + w_buff->m_data_offset
+                                , bytes_written);
+
         w_buff->m_data_offset += bytes_written;
         if (w_buff->m_data_offset == w_buff->m_data_len)
         {

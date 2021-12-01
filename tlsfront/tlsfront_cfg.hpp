@@ -18,6 +18,9 @@ struct tlsfront_cfg
     std::string stats_ip;
     u_short stats_port;
 
+    std::string monitor_ip;
+    u_short monitor_port;
+
 };
 
 #endif

@@ -22,6 +22,10 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
                             , cfg->stats_ip.c_str()
                             , htons(cfg->stats_port));
 
+    ev_socket::set_sockaddr (&m_app_ctx.m_monitor_addr
+                            , cfg->monitor_ip.c_str()
+                            , htons(cfg->monitor_port));
+
     m_app_ctx.m_sock_opt.rcv_buff_len = 0;
     m_app_ctx.m_sock_opt.snd_buff_len = 0;
 
@@ -124,15 +128,21 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
         SSL_CTX_set_dh_auto(m_grp_ctx.m_s_ssl_ctx, 1);
     }
 
-    m_stats_sock 
+    m_app_ctx.m_stats_sock 
         = (tlsfront_socket*) new_udp_client (nullptr
                                             , &m_app_ctx.m_stats_addr
+                                            , &m_app_ctx.m_stats_arr);
+
+    m_app_ctx.m_monitor_sock 
+        = (tlsfront_socket*) new_udp_client (nullptr
+                                            , &m_app_ctx.m_monitor_addr
                                             , &m_app_ctx.m_stats_arr);
 
     if (m_grp_ctx.m_s_ssl_ctx 
         && m_grp_ctx.m_c_ssl_ctx 
         && m_front_lsocket
-        && m_stats_sock)
+        && m_app_ctx.m_stats_sock
+        && m_app_ctx.m_monitor_sock)
     {
         m_init_ok = true;
     }
@@ -141,11 +151,18 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
 
 tlsfront_app::~tlsfront_app()
 {
-    if (m_stats_sock)
+    if (m_app_ctx.m_stats_sock)
     {
-        ev_socket::free_udp_client(m_stats_sock);
-        m_stats_sock = nullptr;
+        ev_socket::free_udp_client(m_app_ctx.m_stats_sock);
+        m_app_ctx.m_stats_sock = nullptr;
     }
+
+    if (m_app_ctx.m_monitor_sock)
+    {
+        ev_socket::free_udp_client(m_app_ctx.m_monitor_sock);
+        m_app_ctx.m_monitor_sock = nullptr;
+    }
+  
 }
 
 
@@ -166,7 +183,8 @@ void tlsfront_app::run_iter(bool tick_sec)
 
         std::string s = k.dump();
 
-        m_stats_sock->udp_write((const char*)s.c_str(), s.length()+1);
+        m_app_ctx.m_stats_sock->udp_write(
+                    (const char*)s.c_str(), s.length()+1);
     }
 }
 

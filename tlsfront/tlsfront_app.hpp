@@ -20,10 +20,14 @@ struct tlsfront_app_ctx
     ev_sockaddr m_server_addr;
     ev_sockaddr m_back_addr;
     ev_sockaddr m_stats_addr;
+    ev_sockaddr m_monitor_addr;
     
     ev_socket_opt m_sock_opt;
     
     std::vector<ev_sockstats*> m_stats_arr;
+    
+    tlsfront_socket* m_monitor_sock;
+    tlsfront_socket* m_stats_sock;
 };
 
 class tlsfront_app : public tlspack_app
@@ -46,8 +50,6 @@ public:
     tlsfront_grp_ctx m_grp_ctx;
 
     bool m_init_ok;
-
-    tlsfront_socket* m_stats_sock;
 };
 
 
