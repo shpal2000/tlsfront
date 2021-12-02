@@ -53,4 +53,7 @@ COPY ./*.so /usr/local/tlsfront/lib/
 RUN echo "/usr/local/tlsfront/lib" > /etc/ld.so.conf.d/tlsfront.conf
 RUN ldconfig -v
 COPY ./*.exe /usr/local/bin/
+RUN mkdir -p /tlsfront_web/
+COPY web/ /tlsfront_web/
+
 ENV DEBIAN_FRONTEND=
