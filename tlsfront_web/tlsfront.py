@@ -7,6 +7,7 @@ async def index_handle(request):
 
 app = web.Application()
 
+app.add_routes([web.static('/build', 'public/build')])
 app.add_routes([web.route('get', '/{tail:.*}', index_handle)])
 
 
