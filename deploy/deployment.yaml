@@ -1,25 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tlsfront-deploy
+  name: tlsfront-backend
   labels:
-    app: tlsfront
+    app: tlsfront-backend
 spec:
   selector:
     matchLabels:
-      app: tlsfront
-  replicas: 10
+      app: tlsfront-backend
+  replicas: 1
   template:
     metadata:
       labels:
-        app: tlsfront
+        app: tlsfront-backend
     spec:
       containers:
-      - name: tlsfront
+      - name: tlsfront-backend
         image: tlspack/tlsfront:latest
         imagePullPolicy: Always
         command: ["tlsfront.exe"]
         args: []
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         volumeMounts:
         - name: config-volume
           mountPath: /configs/
@@ -28,5 +33,36 @@ spec:
         configMap:
           name: tlsfront-config
 
+---
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tlsfront-web
+  labels:
+    app: tlsfront-web
+spec:
+  selector:
+    matchLabels:
+      app: tlsfront-web
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tlsfront-web
+    spec:
+      containers:
+      - name: tlsfront-web
+        image: tlspack/tlsfront:latest
+        imagePullPolicy: Always
+        workingDir: /tlsfront_web/
+        command: ["python3"]
+        args: ["tlsfront.py"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /configs/
+      volumes:
+      - name: config-volume
+        configMap:
+          name: tlsfront-config
 

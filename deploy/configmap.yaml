@@ -8,19 +8,25 @@ data:
       "front_ip"   : "0.0.0.0",
       "front_port" : 443,
 
-      "server_ip"   : "<tbd>",
+      "server_ip"   : "10.22.0.226",
       "server_port" : 443,
-      
-      "back_ip"   : "0.0.0.0"
+
+      "stats_ip"   : "10.115.78.80",
+      "stats_port" : 7000,
+
+      "monitor_ip"   : "10.115.78.80",
+      "monitor_port" : 7500,
+
+      "back_ip"   : "0.0.0.0",
+
+      "web_port"  : 8888
     }
   
   key.pem: |
     -----BEGIN PRIVATE KEY-----
-    <tbd>
     -----END PRIVATE KEY-----
 
   cert.pem: |
     -----BEGIN CERTIFICATE-----
-    <tbd>
     -----END CERTIFICATE-----
 
