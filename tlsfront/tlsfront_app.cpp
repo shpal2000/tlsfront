@@ -184,7 +184,7 @@ void tlsfront_app::run_iter(bool tick_sec)
         std::string s = k.dump();
 
         m_app_ctx.m_stats_sock->udp_write(
-                    (const char*)s.c_str(), s.length()+1);
+                    (const char*)s.c_str(), s.length());
     }
 }
 
