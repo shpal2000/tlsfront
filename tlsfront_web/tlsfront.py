@@ -1,6 +1,8 @@
 import os
 import aiohttp, json
 from aiohttp import web
+import asyncio
+import json
 
 async def index_handle(request):
     return web.FileResponse('public/index.html')
@@ -11,8 +13,34 @@ app.add_routes([web.static('/build', 'public/build')])
 app.add_routes([web.static('/assets', 'public/assets')])
 app.add_routes([web.route('get', '/{tail:.*}', index_handle)])
 
-if __name__ == '__main__':  
-    web.run_app(app, port=8888)
+
+class StatsListener:
+    def connection_made(self, transport):
+        self.transport = transport
+
+    def datagram_received(self, data, addr):
+        message = data.decode()
+        stats = json.loads(message)
+
+
+
+gstats = {}
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    runner = aiohttp.web.AppRunner(app)
+    loop.run_until_complete(runner.setup())
+    site = aiohttp.web.TCPSite(runner, port=8888)
+    loop.run_until_complete(site.start())
+
+    listen = loop.create_datagram_endpoint(StatsListener
+                            , local_addr=('0.0.0.0', 7000))
+    loop.run_until_complete(listen)
+
+    loop.run_forever()
+
+
+    # web.run_app(app, port=8888)
 
 # app.add_routes([web.static('/assets', 'ui/assets')])
 # app.add_routes([web.route('*', '/api/{api_path:.*}', api_handle)])

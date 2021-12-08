@@ -9,6 +9,7 @@
 		<a class="navbar-item" href="https://www.gigamon.com">
 			<!-- svelte-ignore a11y-missing-attribute -->
 			<img src="/assets/gigamon.png" width="32" height="32">
+			SSL FrontDoor
 		</a>
 		<!-- svelte-ignore a11y-missing-attribute -->
 		<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarTopMenu" on:click="{() => isActive=!isActive}">
