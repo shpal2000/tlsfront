@@ -4,15 +4,20 @@ from aiohttp import web
 import asyncio
 import json
 
+gstats = {}
+
 async def index_handle(request):
     return web.FileResponse('public/index.html')
+
+async def api_handle(request):
+    return web.json_response(gstats)
 
 app = web.Application()
 
 app.add_routes([web.static('/build', 'public/build')])
 app.add_routes([web.static('/assets', 'public/assets')])
+app.add_routes([web.route('*', '/api/{api_path:.*}', api_handle)])
 app.add_routes([web.route('get', '/{tail:.*}', index_handle)])
-
 
 class StatsListener:
     def connection_made(self, transport):
@@ -21,10 +26,7 @@ class StatsListener:
     def datagram_received(self, data, addr):
         message = data.decode()
         stats = json.loads(message)
-
-
-
-gstats = {}
+        gstats[stats['podIp']] =  stats
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
@@ -39,11 +41,4 @@ if __name__ == '__main__':
 
     loop.run_forever()
 
-
     # web.run_app(app, port=8888)
-
-# app.add_routes([web.static('/assets', 'ui/assets')])
-# app.add_routes([web.route('*', '/api/{api_path:.*}', api_handle)])
-# app.add_routes([web.route('get', '/favicon.ico', favicon_handle)])
-# app.add_routes([web.route('get', '/robots.txt', robots_handle)])
-# app.add_routes([web.route('get', '/{tail:.*}', index_handle)])
