@@ -73,12 +73,14 @@ def main ():
     loop.run_until_complete(runner.setup())
     site = aiohttp.web.TCPSite(runner
                 , host=cfg['webui_ip']
-                , port=cfg['webui_port'])
+                , port=cfg['webui_port']
+                , reuse_port=True)
     loop.run_until_complete(site.start())
 
     listen = loop.create_datagram_endpoint(StatsListener
                     , local_addr=(cfg['webui_ip']
-                    , cfg['stats_port']))
+                                    , cfg['stats_port'])
+                    , reuse_port=True)
 
     loop.run_until_complete(listen)
 
