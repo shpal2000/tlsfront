@@ -16,6 +16,7 @@ struct tlsfront_cfg
 
     std::string server_ip;
     u_short server_port;
+    int server_ssl;
 
     std::string stats_ip;
     u_short stats_port;

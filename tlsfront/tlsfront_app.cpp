@@ -7,6 +7,7 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
                                     , tlsfront_stats* gstats)
 {
     m_app_ctx.m_app_id = cfg->m_app_id;
+    m_app_ctx.m_server_ssl = cfg->server_ssl;
 
     ev_socket::set_sockaddr (&m_app_ctx.m_front_addr
                             , cfg->front_ip.c_str()
