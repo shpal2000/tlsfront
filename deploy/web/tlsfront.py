@@ -60,7 +60,7 @@ class StatsListener:
         gstats[appId]['sum'] = sum_stats
 
 def main ():
-    global stats_tick
+    global stats_ticks
 
     cfg_file = '/configs/config.json'
     with open(cfg_file) as f:
