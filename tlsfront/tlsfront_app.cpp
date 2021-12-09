@@ -6,6 +6,8 @@
 tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
                                     , tlsfront_stats* gstats)
 {
+    m_app_ctx.m_app_id = cfg->m_app_id;
+
     ev_socket::set_sockaddr (&m_app_ctx.m_front_addr
                             , cfg->front_ip.c_str()
                             , htons(cfg->front_port));
@@ -177,11 +179,10 @@ void tlsfront_app::run_iter(bool tick_sec)
         json j;
         m_stats.dump_json (j);
 
-        json k;
-        k["podIp"] = getenv ("MY_POD_IP");
-        k["tcpConnInitSuccess"] = j["tcpConnInitSuccess"];
+        j["appId"] = m_app_ctx.m_app_id;
+        j["podIp"] = getenv ("MY_POD_IP");
 
-        std::string s = k.dump();
+        std::string s = j.dump();
 
         m_app_ctx.m_stats_sock->udp_write(
                     (const char*)s.c_str(), s.length());

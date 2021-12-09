@@ -19,6 +19,8 @@ int main(int /*argc*/, char ** /*argv*/)
     tlsfront_cfg app_cfg;
     tlsfront_stats app_gstats;
 
+    app_cfg.m_app_id = cfg_json["front_ip"].get<std::string>();
+
     app_cfg.front_ip = cfg_json["front_ip"].get<std::string>();
     app_cfg.front_port = cfg_json["front_port"].get<int>();
 

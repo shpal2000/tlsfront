@@ -6,6 +6,8 @@
 
 struct tlsfront_cfg
 {
+    std::string m_app_id;
+    
     std::string front_ip;
     u_short front_port;
 

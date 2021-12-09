@@ -28,6 +28,8 @@ struct tlsfront_app_ctx
     
     tlsfront_socket* m_monitor_sock;
     tlsfront_socket* m_stats_sock;
+
+    std::string m_app_id; 
 };
 
 class tlsfront_app : public tlspack_app
