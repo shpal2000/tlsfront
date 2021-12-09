@@ -5,6 +5,7 @@ import asyncio
 import json
 
 gstats = {}
+stats_ticks = 60
 
 async def index_handle(request):
     return web.FileResponse('public/index.html')
@@ -37,6 +38,9 @@ class StatsListener:
             gstats[appId][podIp] = []
 
         gstats[appId][podIp].append(stats)
+        if len(gstats[appId][podIp]) > stats_ticks:
+            gstats[appId][podIp].pop(0)
+
 
         if gstats[appId].get('sum'):
             del gstats[appId]['sum']
@@ -55,10 +59,14 @@ class StatsListener:
 
         gstats[appId]['sum'] = sum_stats
 
-if __name__ == '__main__':
+def main ():
+    global stats_tick
+
     cfg_file = '/configs/config.json'
     with open(cfg_file) as f:
         cfg = json.loads(f.read())
+
+    stats_ticks = cfg['stats_ticks']
 
     loop = asyncio.get_event_loop()
     runner = aiohttp.web.AppRunner(app)
@@ -75,5 +83,8 @@ if __name__ == '__main__':
     loop.run_until_complete(listen)
 
     loop.run_forever()
-
     # web.run_app(app, port=8888)
+
+if __name__ == '__main__':
+    main()
+    
