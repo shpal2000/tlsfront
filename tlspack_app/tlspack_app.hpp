@@ -55,6 +55,10 @@ struct tlspack_app_stats : public ev_sockstats
         dump_json_ev_sockstats (j, this);
     };
 
+    virtual void tick_sec ()
+    {
+        ev_sockstats::tick_sec();
+    }
 };
 
 class tlspack_app : public ev_app

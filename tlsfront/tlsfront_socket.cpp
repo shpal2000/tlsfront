@@ -133,6 +133,7 @@ void tlsfront_socket::on_establish ()
     else
     {
         inc_tlsfront_stats(tlsfrontSessions);
+        inc_tlsfront_stats(tlsfrontActSessions);
         
         m_session->m_session_established = true;
         if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
@@ -176,6 +177,7 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
         {
             ev_buff* w_buff = m_udp_buff_list.front();
             w_buff->m_data_offset += bytes_written;
+            add_tlsfront_stats(tlsfrontBytesInSec,bytes_written);
 
             if (w_buff->m_data_offset == w_buff->m_data_len)
             {
@@ -299,6 +301,7 @@ void tlsfront_socket::on_rstatus (int bytes_read, int read_status)
         }
         else
         {
+            add_tlsfront_stats(tlsfrontBytesInSec,bytes_read);
             m_read_buff->m_data_len = bytes_read;
             m_other_socket->m_write_buff_list.push(m_read_buff);
             m_read_buff = nullptr;
@@ -320,6 +323,7 @@ void tlsfront_socket::on_finish ()
     {
         if (!m_other_socket->m_session)
         {
+            dec_tlsfront_stats(tlsfrontActSessions);
             delete m_session;
         }
 

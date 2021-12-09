@@ -26,17 +26,52 @@ class StatsListener:
     def datagram_received(self, data, addr):
         message = data.decode()
         stats = json.loads(message)
-        gstats[stats['podIp']] =  stats
+        appId = stats['appId']
+        podIp = stats['podIp']
+        del stats['appId']
+        del stats['podIp']
+
+        if not gstats.get(appId):
+            gstats[appId] = {}
+        if not gstats[appId].get(podIp):
+            gstats[appId][podIp] = []
+
+        gstats[appId][podIp].append(stats)
+
+        if gstats[appId].get('sum'):
+            del gstats[appId]['sum']
+
+        last_stats = []
+        sum_stats = {}
+        for _, v in gstats[appId].items():
+            if v:
+                last_stats.append(v[len(v)-1])
+
+        if last_stats:
+            for k, _ in stats.items():
+                sum_stats[k] = 0
+                for next_stats in last_stats:
+                    sum_stats[k] = sum_stats[k]+next_stats[k]
+
+        gstats[appId]['sum'] = sum_stats
 
 if __name__ == '__main__':
+    cfg_file = '/configs/config.json'
+    with open(cfg_file) as f:
+        cfg = json.loads(f.read())
+
     loop = asyncio.get_event_loop()
     runner = aiohttp.web.AppRunner(app)
     loop.run_until_complete(runner.setup())
-    site = aiohttp.web.TCPSite(runner, port=8888)
+    site = aiohttp.web.TCPSite(runner
+                , host=cfg['webui_ip']
+                , port=cfg['webui_port'])
     loop.run_until_complete(site.start())
 
     listen = loop.create_datagram_endpoint(StatsListener
-                            , local_addr=('0.0.0.0', 7000))
+                    , local_addr=(cfg['webui_ip']
+                    , cfg['stats_port']))
+
     loop.run_until_complete(listen)
 
     loop.run_forever()
