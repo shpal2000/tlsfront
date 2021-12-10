@@ -181,7 +181,6 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
         {
             ev_buff* w_buff = m_udp_buff_list.front();
             w_buff->m_data_offset += bytes_written;
-            add_tlsfront_stats(tlsfrontBytesInSec,bytes_written);
 
             if (w_buff->m_data_offset == w_buff->m_data_len)
             {
@@ -197,6 +196,8 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
             ev_buff* w_buff = m_write_buff_list.front();
 
             w_buff->m_data_offset += bytes_written;
+            add_tlsfront_stats(tlsfrontBytesInSec,bytes_written);
+
             if (w_buff->m_data_offset == w_buff->m_data_len)
             {
                 m_write_buff_list.pop();
