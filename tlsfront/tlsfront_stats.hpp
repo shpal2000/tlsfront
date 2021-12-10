@@ -17,7 +17,7 @@ struct tlsfront_stats_data : tlspack_app_stats
         tlspack_app_stats::tick_sec();
 
         tlsfrontThroughput = tlsfrontBytesInSec * 8;
-        tlsfrontBytesInSec = 0;
+        // tlsfrontBytesInSec = 0;
     }
 
     virtual void dump_json (json &j)
