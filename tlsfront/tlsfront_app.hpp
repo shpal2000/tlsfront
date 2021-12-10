@@ -61,10 +61,7 @@ public:
 { \
     for (uint i=0; i < this->get_sockstats_arr()->size(); i++) { \
         ev_sockstats* __stats_ptr = (*(this->get_sockstats_arr()))[i]; \
-        if (isclass<tlsfront_stats*>(__stats_ptr)) \
-        { \
-            ((tlsfront_stats*)(__stats_ptr))->__stat_name++; \
-        } \
+        ((tlsfront_stats*)(__stats_ptr))->__stat_name++; \
     } \
 }
 
@@ -72,10 +69,7 @@ public:
 { \
     for (uint i=0; i < this->get_sockstats_arr()->size(); i++) { \
         ev_sockstats* __stats_ptr = (*(this->get_sockstats_arr()))[i]; \
-        if (isclass<tlsfront_stats*>(__stats_ptr)) \
-        { \
-            ((tlsfront_stats*)(__stats_ptr))->__stat_name--; \
-        } \
+        ((tlsfront_stats*)(__stats_ptr))->__stat_name--; \
     } \
 }
 
@@ -83,10 +77,7 @@ public:
 { \
     for (uint i=0; i < this->get_sockstats_arr()->size(); i++) { \
         ev_sockstats* __stats_ptr = (*(this->get_sockstats_arr()))[i]; \
-        if (isclass<tlsfront_stats*>(__stats_ptr)) \
-        { \
-            ((tlsfront_stats*)(__stats_ptr))->__stat_name += (__value); \
-        } \
+        ((tlsfront_stats*)(__stats_ptr))->__stat_name += (__value); \
     } \
 }
 
@@ -94,10 +85,7 @@ public:
 { \
     for (uint i=0; i < this->get_sockstats_arr()->size(); i++) { \
         ev_sockstats* __stats_ptr = (*(this->get_sockstats_arr()))[i]; \
-        if (isclass<tlsfront_stats*>(__stats_ptr)) \
-        { \
-            ((tlsfront_stats*)(__stats_ptr))->__stat_name -= (__value); \
-        } \
+        ((tlsfront_stats*)(__stats_ptr))->__stat_name -= (__value); \
     } \
 }
 
