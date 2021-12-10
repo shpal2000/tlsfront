@@ -7,6 +7,7 @@ tlsfront_socket::tlsfront_socket(bool is_udp)
     m_session = nullptr;
     m_other_socket = nullptr;
     m_read_buff = nullptr;
+    m_udp_read_buff = nullptr;
     m_ssl_init = false;
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
@@ -27,6 +28,20 @@ tlsfront_socket::~tlsfront_socket()
         ev_buff::free_ev_buff(m_write_buff_list.front());
         m_write_buff_list.pop();
     }
+
+
+    if (m_udp_read_buff)
+    {
+        ev_buff::free_ev_buff(m_udp_read_buff);
+        m_udp_read_buff = nullptr;
+    }
+
+    while (!m_udp_write_buff_list.empty())
+    {
+        ev_buff::free_ev_buff(m_udp_write_buff_list.front());
+        m_udp_write_buff_list.pop();
+    }
+
 
     if (m_ssl)
     {
@@ -151,9 +166,9 @@ void tlsfront_socket::on_write ()
 {
     if (m_udp)
     {
-        if (!m_udp_buff_list.empty())
+        if (!m_udp_write_buff_list.empty())
         {
-            ev_buff* w_buff = m_udp_buff_list.front();
+            ev_buff* w_buff = m_udp_write_buff_list.front();
 
             write_next_data (w_buff->m_buff
                             , w_buff->m_data_offset
@@ -179,12 +194,12 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
     {
         if (bytes_written > 0)
         {
-            ev_buff* w_buff = m_udp_buff_list.front();
+            ev_buff* w_buff = m_udp_write_buff_list.front();
             w_buff->m_data_offset += bytes_written;
 
             if (w_buff->m_data_offset == w_buff->m_data_len)
             {
-                m_udp_buff_list.pop();
+                m_udp_write_buff_list.pop();
                 ev_buff::free_ev_buff(w_buff);
             }
         }
@@ -202,7 +217,7 @@ void tlsfront_socket::on_wstatus (int bytes_written, int write_status)
             {
                 m_write_buff_list.pop();
                 w_buff->m_data_offset = 0;
-                m_app_ctx->m_monitor_sock->m_udp_buff_list.push(w_buff);
+                m_app_ctx->m_monitor_sock->m_udp_write_buff_list.push(w_buff);
 
                 if (m_write_buff_list.empty() && m_write_close_marked)
                 {
@@ -226,11 +241,11 @@ void tlsfront_socket::on_read ()
         rd_buff = ev_buff::alloc_ev_buff(20480);
         if (rd_buff)
         {
-            m_read_buff = rd_buff;
-            m_read_buff->m_data_offset = 0;
-            m_read_buff->m_data_len = 0;
+            m_udp_read_buff = rd_buff;
+            m_udp_read_buff->m_data_offset = 0;
+            m_udp_read_buff->m_data_len = 0;
             read_next_data (rd_buff->m_buff
-                            , m_read_buff->m_data_offset
+                            , m_udp_read_buff->m_data_offset
                             , rd_buff->m_buff_len);
         }
         else
@@ -262,10 +277,9 @@ void tlsfront_socket::on_rstatus (int bytes_read, int read_status)
 {
     if (m_udp)
     {
-        m_read_buff->m_data_len = bytes_read;
-        printf("%s", m_read_buff->m_buff);
-        delete m_read_buff;
-        m_read_buff = nullptr;
+        m_udp_read_buff->m_data_len = bytes_read;
+        delete m_udp_read_buff;
+        m_udp_read_buff = nullptr;
     }
     else
     {

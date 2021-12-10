@@ -110,25 +110,25 @@ tlsfront_app::tlsfront_app(tlsfront_cfg* cfg
     m_grp_ctx.m_c_ssl_ctx = SSL_CTX_new(TLS_client_method());
     if (m_grp_ctx.m_c_ssl_ctx)
     {
-        SSL_CTX_set_min_proto_version (m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set_min_proto_version (m_grp_ctx.m_c_ssl_ctx
                                         , SSL3_VERSION);
-        SSL_CTX_set_max_proto_version (m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set_max_proto_version (m_grp_ctx.m_c_ssl_ctx
                                         , TLS1_3_VERSION);
 
-        SSL_CTX_set_mode(m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set_mode(m_grp_ctx.m_c_ssl_ctx
                             , SSL_MODE_ENABLE_PARTIAL_WRITE);
 
-        SSL_CTX_set_session_cache_mode(m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set_session_cache_mode(m_grp_ctx.m_c_ssl_ctx
                                         , SSL_SESS_CACHE_CLIENT);
 
-        SSL_CTX_set_session_id_context(m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set_session_id_context(m_grp_ctx.m_c_ssl_ctx
                                         , (unsigned char*)this
                                         , sizeof(void*));
 
-        SSL_CTX_set1_groups_list(m_grp_ctx.m_s_ssl_ctx
+        SSL_CTX_set1_groups_list(m_grp_ctx.m_c_ssl_ctx
                                     , "P-521:P-384:P-256");
 
-        SSL_CTX_set_dh_auto(m_grp_ctx.m_s_ssl_ctx, 1);
+        SSL_CTX_set_dh_auto(m_grp_ctx.m_c_ssl_ctx, 1);
     }
 
     m_app_ctx.m_stats_sock 
