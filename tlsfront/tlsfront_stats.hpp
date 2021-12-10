@@ -27,6 +27,7 @@ struct tlsfront_stats_data : tlspack_app_stats
         j["tlsfrontSessions"] = tlsfrontSessions;
         j["tlsfrontActSessions"] = tlsfrontActSessions;
         j["tlsfrontThroughput"] = tlsfrontThroughput;
+        j["tlsfrontBytesInSec"] = tlsfrontBytesInSec;
     }
 
     virtual ~tlsfront_stats_data() {};
