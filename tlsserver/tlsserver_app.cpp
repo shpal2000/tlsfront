@@ -98,8 +98,6 @@ tlsserver_app::tlsserver_app(tlsserver_cfg* cfg
         
         m_server_lsocket->m_app_ctx = &m_app_ctx;
         m_server_lsocket->m_grp_ctx = &m_grp_ctx;
-
-
     }
 
     m_app_ctx.m_stats_sock 

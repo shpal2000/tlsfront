@@ -29,9 +29,13 @@ struct tlsclient_app_ctx
     int m_server_ssl;
 
     int m_send_recv_len;
-    
+
     int m_send_recv_buff_len;
     char* m_send_recv_buff;
+
+    int m_cps;
+    uint64_t m_total_conn_count;
+    uint64_t m_max_active_conn_count;
 };
 
 class tlsclient_app : public tlspack_app
@@ -53,6 +57,12 @@ public:
     tlsclient_grp_ctx m_grp_ctx;
 
     bool m_init_ok;
+
+    bool to_new_connect ();
+
+    bool m_stop;
+    uint64_t m_curr_conn_count;
+    std::chrono::steady_clock::time_point m_conn_init_time;
 };
 
 

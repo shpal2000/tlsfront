@@ -31,6 +31,10 @@ int main(int /*argc*/, char ** /*argv*/)
 
     app_cfg.send_recv_len = cfg_json["send_recv_len"].get<int>();
 
+    app_cfg.cps = cfg_json["cps"].get<int>();
+    app_cfg.total_conn_count = cfg_json["total_conn_count"].get<int>();
+    app_cfg.max_active_conn_count = cfg_json["max_active_conn_count"].get<int>();
+
 
     tlsclient_app* tcpApp 
         = new tlsclient_app(&app_cfg, &app_gstats);

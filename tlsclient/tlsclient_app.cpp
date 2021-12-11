@@ -10,6 +10,10 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
 
     m_app_ctx.m_send_recv_len = cfg->send_recv_len;
 
+    m_app_ctx.m_cps = cfg->cps;
+    m_app_ctx.m_total_conn_count = cfg->total_conn_count;    
+    m_app_ctx.m_max_active_conn_count = cfg->max_active_conn_count;
+
     m_app_ctx.m_send_recv_buff_len = 4096;
     m_app_ctx.m_send_recv_buff 
         = (char*) malloc(m_app_ctx.m_send_recv_buff_len);
@@ -18,6 +22,7 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
     ev_socket::set_sockaddr (&m_app_ctx.m_server_addr
                             , cfg->server_ip.c_str()
                             , htons(cfg->server_port));
+
 
     ev_socket::set_sockaddr (&m_app_ctx.m_stats_addr
                             , cfg->stats_ip.c_str()
@@ -66,6 +71,9 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
     {
         m_init_ok = true;
     }
+
+    m_stop = false;
+    m_curr_conn_count = 0;
 }
 
 
@@ -98,6 +106,24 @@ void tlsclient_app::run_iter(bool tick_sec)
         m_app_ctx.m_stats_sock->udp_write(
                     (const char*)s.c_str(), s.length());
     }
+
+    if (to_new_connect())
+    {
+        tlsclient_socket* client_socket 
+            = (tlsclient_socket*) 
+            new_tcp_connect (NULL
+                            , &m_app_ctx.m_server_addr
+                            , &m_app_ctx.m_stats_arr
+                            , NULL
+                            , &m_app_ctx.m_sock_opt);
+        
+        if (client_socket)
+        {
+            m_curr_conn_count++;
+            client_socket->m_app_ctx = &m_app_ctx;
+            client_socket->m_grp_ctx = &m_grp_ctx;
+        }
+    }
 }
 
 ev_socket* tlsclient_app::alloc_socket(bool is_udp)
@@ -108,4 +134,30 @@ ev_socket* tlsclient_app::alloc_socket(bool is_udp)
 void tlsclient_app::free_socket(ev_socket* ev_sock)
 {
     delete ev_sock;
+}
+
+bool tlsclient_app::to_new_connect()
+{
+    bool n = false;
+
+    if (not m_stop) {
+        if (m_curr_conn_count == 0){
+            m_conn_init_time = std::chrono::steady_clock::now ();
+            n = 1;
+        } else if ((m_app_ctx.m_total_conn_count == 0) 
+                || (m_curr_conn_count < m_app_ctx.m_total_conn_count)){
+
+            if ( (m_app_ctx.m_max_active_conn_count == 0) || (m_stats.tcpConnInitInUse < m_app_ctx.m_max_active_conn_count) )  {
+                auto t = std::chrono::steady_clock::now();
+                auto span = std::chrono::duration_cast<std::chrono::nanoseconds>
+                                                (t - m_conn_init_time).count();
+                uint64_t c = (m_app_ctx.m_cps * span) / 1000000000;
+                if (c > m_curr_conn_count ) {
+                    n = true;
+                }
+            }
+        }
+    }
+
+    return n;
 }

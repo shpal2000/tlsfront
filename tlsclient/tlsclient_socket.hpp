@@ -27,8 +27,6 @@ public:
 
 private:
     bool ssl_client_init();
-    void set_context_from(tlsclient_socket* from_sock);
-    void set_context_from_parent();
     void abort_session();
 
 private:

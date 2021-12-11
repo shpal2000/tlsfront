@@ -34,20 +34,6 @@ bool tlsclient_socket::ssl_client_init()
     return false;
 }
 
-void tlsclient_socket::set_context_from(tlsclient_socket* from_sock)
-{
-    this->m_app_ctx = from_sock->m_app_ctx;
-    this->m_grp_ctx = from_sock->m_grp_ctx;
-}
-
-void tlsclient_socket::set_context_from_parent()
-{
-    tlsclient_socket* parent_socket 
-        = (tlsclient_socket*)this->get_parent();
-
-    set_context_from (parent_socket);
-}
-
 void tlsclient_socket::abort_session()
 {
     this->abort();

@@ -16,6 +16,10 @@ struct tlsclient_cfg
     u_short stats_port;
 
     int send_recv_len;
+
+    int cps;
+    uint64_t total_conn_count;
+    uint64_t max_active_conn_count;
 };
 
 #endif
