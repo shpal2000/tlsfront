@@ -1,15 +1,15 @@
-#ifndef __tlsclient_TCP_SOCKET__H
-#define __tlsclient_TCP_SOCKET__H
+#ifndef __tlsserver_TCP_SOCKET__H
+#define __tlsserver_TCP_SOCKET__H
 
-#include "tlsclient_app.hpp"
+#include "tlsserver_app.hpp"
 
-class tlsclient_session;
+class tlsserver_session;
 
-class tlsclient_socket : public ev_socket
+class tlsserver_socket : public ev_socket
 {
 public:
-    tlsclient_socket(bool is_udp=false);
-    virtual ~tlsclient_socket();
+    tlsserver_socket(bool is_udp=false);
+    virtual ~tlsserver_socket();
     
     void on_establish ();
     void on_write ();
@@ -22,12 +22,12 @@ public:
 
 public:
     
-    tlsclient_app_ctx* m_app_ctx;
-    tlsclient_grp_ctx* m_grp_ctx;
+    tlsserver_app_ctx* m_app_ctx;
+    tlsserver_grp_ctx* m_grp_ctx;
 
 private:
-    bool ssl_client_init();
-    void set_context_from(tlsclient_socket* from_sock);
+    bool ssl_server_init();
+    void set_context_from(tlsserver_socket* from_sock);
     void set_context_from_parent();
     void abort_session();
 
