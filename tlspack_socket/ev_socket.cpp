@@ -1562,7 +1562,7 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
             }
             ev_sock_ptr->on_finish ();
             epoll_ctxp->m_app->remove_from_active_list (ev_sock_ptr);
-            // epoll_ctxp->m_app->free_socket (ev_sock_ptr);
+            epoll_ctxp->m_app->free_socket (ev_sock_ptr);
             epoll_ctxp->m_finish_list.pop();
         }
 
