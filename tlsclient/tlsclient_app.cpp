@@ -95,13 +95,13 @@ void tlsclient_app::run_iter(bool tick_sec)
     {
         m_stats.tick_sec();
 
-        json j;
-        m_stats.dump_json (j);
+        // json j;
+        // m_stats.dump_json (j);
 
-        j["appId"] = m_app_ctx.m_app_id;
-        j["podIp"] = getenv ("MY_POD_IP");
+        // j["appId"] = m_app_ctx.m_app_id;
+        // j["podIp"] = getenv ("MY_POD_IP");
 
-        std::string s = j.dump();
+        // std::string s = j.dump();
 
         // m_app_ctx.m_stats_sock->udp_write(
         //             (const char*)s.c_str(), s.length());
