@@ -28,8 +28,10 @@ struct tlsclient_app_ctx
 
     int m_server_ssl;
 
-    int m_client_send_length;
-    int m_server_send_length;
+    int m_send_recv_len;
+    
+    int m_send_recv_buff_len;
+    char* m_send_recv_buff;
 };
 
 class tlsclient_app : public tlspack_app

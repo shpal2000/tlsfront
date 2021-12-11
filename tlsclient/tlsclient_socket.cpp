@@ -3,28 +3,17 @@
 tlsclient_socket::tlsclient_socket(bool is_udp)
                             : ev_socket (is_udp)
 {
-    m_read_buff = nullptr;
     m_ssl_init = false;
     m_app_ctx = nullptr;
     m_grp_ctx = nullptr;
     m_ssl = nullptr;
     m_write_close_marked = false;
+    m_bytes_read = 0;
+    m_bytes_written = 0;
 }
 
 tlsclient_socket::~tlsclient_socket()
 {
-    if (m_read_buff)
-    {
-        ev_buff::free_ev_buff(m_read_buff);
-        m_read_buff = nullptr;
-    }
-
-    while (!m_write_buff_list.empty())
-    {
-        ev_buff::free_ev_buff(m_write_buff_list.front());
-        m_write_buff_list.pop();
-    }
-
     if (m_ssl)
     {
         SSL_free (m_ssl);
@@ -76,13 +65,18 @@ void tlsclient_socket::on_write ()
 {
     if (!m_udp)
     {
-        if (!m_write_buff_list.empty())
+        if (m_bytes_written < m_app_ctx->m_send_recv_len)
         {
-            ev_buff* w_buff = m_write_buff_list.front();
+            int bytes_to_write = m_app_ctx->m_send_recv_len - m_bytes_written;
 
-            write_next_data (w_buff->m_buff
-                            , w_buff->m_data_offset
-                            , w_buff->m_data_len - w_buff->m_data_offset);
+            if (bytes_to_write > m_app_ctx->m_send_recv_buff_len)
+            {
+                bytes_to_write = m_app_ctx->m_send_recv_buff_len;
+            }
+
+            write_next_data (m_app_ctx->m_send_recv_buff
+                            , 0
+                            , bytes_to_write);
         }
     }
 }
@@ -93,20 +87,12 @@ void tlsclient_socket::on_wstatus (int bytes_written, int write_status)
     {
         if (write_status == WRITE_STATUS_NORMAL)
         {
-            ev_buff* w_buff = m_write_buff_list.front();
-
-            w_buff->m_data_offset += bytes_written;
+            m_bytes_written += bytes_written;
             add_tlsclient_stats(tlsclientBytesInSec,bytes_written);
 
-            if (w_buff->m_data_offset == w_buff->m_data_len)
+            if (m_bytes_written == m_app_ctx->m_send_recv_len)
             {
-                m_write_buff_list.pop();
-                w_buff->m_data_offset = 0;
-
-                if (m_write_buff_list.empty() && m_write_close_marked)
-                {
-                    this->write_close();
-                }
+                this->write_close();
             }
         }
         else
@@ -118,24 +104,11 @@ void tlsclient_socket::on_wstatus (int bytes_written, int write_status)
 
 void tlsclient_socket::on_read ()
 {
-    ev_buff* rd_buff = nullptr;
     if (!m_udp)
     {
-        rd_buff = ev_buff::alloc_ev_buff(20480);
-        if (rd_buff)
-        {
-            m_read_buff = rd_buff;
-            m_read_buff->m_data_offset = 0;
-            m_read_buff->m_data_len = 0;
-            read_next_data (rd_buff->m_buff
-                            , m_read_buff->m_data_offset
-                            , rd_buff->m_buff_len);
-        }
-        else
-        {
-            //todo error handling
-            abort_session ();
-        }
+        read_next_data (m_app_ctx->m_send_recv_buff
+                        , 0
+                        , m_app_ctx->m_send_recv_len);
     }
 }
 
@@ -153,15 +126,10 @@ void tlsclient_socket::on_rstatus (int bytes_read, int read_status)
             {
                 this->abort();
             }
-
-            ev_buff::free_ev_buff(m_read_buff);
-            m_read_buff = nullptr;
         }
         else
         {
             add_tlsclient_stats(tlsclientBytesInSec,bytes_read);
-            m_read_buff->m_data_len = bytes_read;
-            m_read_buff = nullptr;
         }
     }
 }

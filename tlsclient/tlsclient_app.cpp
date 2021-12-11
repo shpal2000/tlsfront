@@ -8,8 +8,12 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
     m_app_ctx.m_app_id = cfg->m_app_id;
     m_app_ctx.m_server_ssl = cfg->server_ssl;
 
-    m_app_ctx.m_client_send_length = cfg->client_send_length;
-    m_app_ctx.m_server_send_length = cfg->server_send_length;
+    m_app_ctx.m_send_recv_len = cfg->send_recv_len;
+
+    m_app_ctx.m_send_recv_buff_len = 4096;
+    m_app_ctx.m_send_recv_buff 
+        = (char*) malloc(m_app_ctx.m_send_recv_buff_len);
+
 
     ev_socket::set_sockaddr (&m_app_ctx.m_server_addr
                             , cfg->server_ip.c_str()
@@ -57,7 +61,8 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
                                             , &m_app_ctx.m_stats_arr);
 
     if (m_grp_ctx.m_c_ssl_ctx 
-        && m_app_ctx.m_stats_sock)
+        && m_app_ctx.m_stats_sock
+        && m_app_ctx.m_send_recv_buff)
     {
         m_init_ok = true;
     }

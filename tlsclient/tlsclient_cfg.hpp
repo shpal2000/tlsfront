@@ -15,8 +15,7 @@ struct tlsclient_cfg
     std::string stats_ip;
     u_short stats_port;
 
-    int client_send_length;
-    int server_send_length;
+    int send_recv_len;
 };
 
 #endif

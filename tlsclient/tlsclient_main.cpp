@@ -29,8 +29,7 @@ int main(int /*argc*/, char ** /*argv*/)
     app_cfg.stats_ip = cfg_json["stats_ip"].get<std::string>();
     app_cfg.stats_port = cfg_json["stats_port"].get<int>();
 
-    app_cfg.client_send_length = cfg_json["client_send_length"].get<int>();
-    app_cfg.server_send_length = cfg_json["server_send_length"].get<int>();
+    app_cfg.send_recv_len = cfg_json["send_recv_len"].get<int>();
 
 
     tlsclient_app* tcpApp 

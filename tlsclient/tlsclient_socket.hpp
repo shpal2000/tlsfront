@@ -21,9 +21,6 @@ public:
 
 
 public:
-
-    ev_buff* m_read_buff;
-    std::queue<ev_buff*> m_write_buff_list;
     
     tlsclient_app_ctx* m_app_ctx;
     tlsclient_grp_ctx* m_grp_ctx;
@@ -39,6 +36,8 @@ private:
     bool m_ssl_init;
     bool m_write_close_marked;
     SSL* m_ssl;
-};
 
+    int m_bytes_read;
+    int m_bytes_written;
+};
 #endif
