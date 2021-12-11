@@ -41,9 +41,12 @@ void tlsclient_socket::abort_session()
 
 void tlsclient_socket::on_establish ()
 {
-    if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
+    if (m_app_ctx->m_server_ssl)
     {
-        abort_session();
+        if (m_grp_ctx->m_c_ssl_ctx && !ssl_client_init()) 
+        {
+            abort_session();
+        }
     }
 }
 
