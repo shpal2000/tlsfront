@@ -113,7 +113,7 @@ void tlsserver_socket::on_read ()
     {
         read_next_data (m_app_ctx->m_send_recv_buff
                         , 0
-                        , m_app_ctx->m_send_recv_len);
+                        , m_app_ctx->m_send_recv_buff_len);
     }
 }
 
