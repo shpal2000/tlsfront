@@ -141,8 +141,8 @@ void tlsserver_app::run_iter(bool tick_sec)
 
         std::string s = j.dump();
 
-        m_app_ctx.m_stats_sock->udp_write(
-                    (const char*)s.c_str(), s.length());
+        // m_app_ctx.m_stats_sock->udp_write(
+        //             (const char*)s.c_str(), s.length());
     }
 }
 
