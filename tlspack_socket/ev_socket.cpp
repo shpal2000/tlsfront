@@ -1543,7 +1543,7 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
         }
 
         //abort process
-        if ( epoll_ctxp->m_abort_list.empty() == false )
+        while ( epoll_ctxp->m_abort_list.empty() == false )
         {
             ev_socket* ev_sock_ptr = epoll_ctxp->m_abort_list.front();
 
@@ -1553,7 +1553,7 @@ void ev_socket::epoll_process (epoll_ctx* epoll_ctxp)
         }
 
         //free up process
-        if ( epoll_ctxp->m_finish_list.empty() == false )
+        while ( epoll_ctxp->m_finish_list.empty() == false )
         {
             ev_socket* ev_sock_ptr = epoll_ctxp->m_finish_list.front();
             if (ev_sock_ptr->is_set_state(STATE_CONN_CLOSE_ON_ERROR))
