@@ -56,10 +56,13 @@ void tlsserver_socket::abort_session()
 void tlsserver_socket::on_establish ()
 {
     set_context_from_parent();
-    
-    if (m_grp_ctx->m_s_ssl_ctx && !ssl_server_init()) 
+
+    if (m_app_ctx->m_server_ssl)
     {
-        abort_session();
+        if (m_grp_ctx->m_s_ssl_ctx && !ssl_server_init()) 
+        {
+            abort_session();
+        }
     }
 }
 
