@@ -4,12 +4,14 @@
 
 <svelte:window on:resize="{() => isActive=false}"/>
 
-<nav class="navbar is-dark is-fixed-top" role="navigation" aria-label="main navigation">
+
+<nav class="navbar is-dark has-shadow" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">
 		<a class="navbar-item" href="https://www.gigamon.com">
 			<!-- svelte-ignore a11y-missing-attribute -->
 			<img src="/assets/gigamon.png" width="32" height="32">
-			SSL FrontDoor
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			[&nbsp;FM&nbsp;]
 		</a>
 		<!-- svelte-ignore a11y-missing-attribute -->
 		<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarTopMenu" on:click="{() => isActive=!isActive}">
@@ -25,16 +27,6 @@
 
 		<div class="navbar-end">
 			<div class="navbar-item">
-				<div class="buttons">
-				  <!-- svelte-ignore a11y-missing-attribute -->
-				  <a class="button is-primary">
-					<strong>Sign up</strong>
-				  </a>
-				  <!-- svelte-ignore a11y-missing-attribute -->
-				  <a class="button is-light">
-					Log in
-				  </a>
-				</div>
 			</div>
 		</div>
 	</div>
