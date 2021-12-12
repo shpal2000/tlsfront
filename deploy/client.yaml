@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tlsclient-configmap
+data:
+  config.json: >
+    {
+      "app_id" : "tlsclient",
+
+
+      "server_ip"   : "10.115.30.245",
+      "server_port" : 89,
+      "server_ssl"  : 1,
+
+      "stats_ip"   : "10.115.30.245",
+      "stats_port" : 7000,
+
+      "send_recv_len" : 102400,
+
+      "cps": 10,
+      "total_conn_count" : 0,
+      "max_active_conn_count" : 10
+    }
+
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tlsclient
+  labels:
+    app: tlsclient
+spec:
+  selector:
+    matchLabels:
+      app: tlsclient
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tlsclient
+    spec:
+      containers:
+      - name: tlsclient
+        image: tlspack/tlsfront:latest
+        imagePullPolicy: Always
+        command: ["tlsclient.exe"]
+        args: []
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        volumeMounts:
+        - name: config-volume
+          mountPath: /configs/
+      volumes:
+      - name: config-volume
+        configMap:
+          name: tlsclient-configmap
+
+
+---
