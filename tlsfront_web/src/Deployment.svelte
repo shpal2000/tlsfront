@@ -1,17 +1,21 @@
 <script>
-	async function getDeployments() {
-		const res = await fetch(`api/stats`);
-		const results = await res.json();
+    import { onMount } from 'svelte';
 
-		if (res.ok) {
-			return results;
-		} else {
-			return {};
-		}
-	}
+    let deployments = {};
 
-    let promise = getDeployments();
+	onMount(() => {
+		const interval = setInterval(() => {
+		    fetch(`api/stats`)
+                .then((response) => response.json())
+                .then((results) => {
+                    deployments = results;
+                });
+		}, 1000);
 
+		return () => {
+			clearInterval(interval);
+		};
+	});
 
 </script>
 
@@ -34,21 +38,17 @@
       </thead>
 
       <tbody>
-            {#await promise}
-                <p>...waiting</p>
-            {:then deployments}
-                {#each Object.entries(deployments) as [Service, ServiceProps]}
-                    <tr>
-                        <td>{Service}</td>
-                        <td>{ServiceProps.sum.tcpAcceptSuccess}</td>
-                        <td>{ServiceProps.sum.sslAcceptSuccess}</td>
-                        <td>{ServiceProps.sum.tcpConnInitSuccess}</td>
-                        <td>{ServiceProps.sum.sslConnInitSuccess}</td>
-                        <td>{ServiceProps.sum.tcpActiveConns}</td>
-                        <td>show</td>
-                    </tr>
-                {/each}
-            {/await}
+        {#each Object.entries(deployments) as [Service, ServiceProps]}
+        <tr>
+            <td>{Service}</td>
+            <td>{ServiceProps.sum.tcpAcceptSuccess}</td>
+            <td>{ServiceProps.sum.sslAcceptSuccess}</td>
+            <td>{ServiceProps.sum.tcpConnInitSuccess}</td>
+            <td>{ServiceProps.sum.sslConnInitSuccess}</td>
+            <td>{ServiceProps.sum.tcpActiveConns}</td>
+            <td>show</td>
+        </tr>
+    {/each}
       </tbody>
 </table>
 
