@@ -52,6 +52,7 @@
                                     label: k,
                                     fill: true,
                                     borderColor: "#ffa700",
+                                    backgroundColor: "#fafad2",
                                     data: deployments[k].sum.map(v => v.tlsfrontThroughput)
                                   }));
                     chart.update();
