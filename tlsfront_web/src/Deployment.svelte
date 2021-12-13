@@ -4,15 +4,15 @@
 
   let deployments = {};
 
-  let chartValues = [20, 10, 5, 2, 20, 30, 45];
-	let chartLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  let chartValues = [];
+	let chartLabels = [];
 	let ctx;
 	let chartCanvas;
   let chart;
   let data = {
 						labels: chartLabels,
 						datasets: [{
-								label: 'Revenue',
+								label: '',
 								backgroundColor: 'rgb(255, 99, 132)',
 								borderColor: 'rgb(255, 99, 132)',
 								data: chartValues
@@ -47,7 +47,7 @@
                 .then((response) => response.json())
                 .then((results) => {
                     deployments = results;
-                    data.labels = [1,2,3];
+                    data.labels = [...Array(60).keys()];
                     data.datasets= Object.keys(deployments).map(k => ({
                                     label: k,
                                     fill: true,
