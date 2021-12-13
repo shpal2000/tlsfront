@@ -1,31 +1,60 @@
 <script>
-    import { onMount } from 'svelte';
-    import Line from "svelte-chartjs/src/Line.svelte"
+  import { onMount } from 'svelte';
+  import Chart from 'chart.js/auto';
 
-    let deployments = {};
-    let data = {
-        labels: [1500,1600,1700,1750,1800,1850,1900,1950,1999,2050],
-        datasets: [{ 
-        data: [86,114,106,106,107,111,133,221,783,2478],
-        label: "Africa",
-        borderColor: "#3e95cd",
-        fill: true
-      }, { 
-        data: [282,350,411,502,635,809,947,1402,3700,5267],
-        label: "Asia",
-        borderColor: "#8e5ea2",
-        fill: true
-      }
-    ]
-    }
+  let deployments = {};
+
+  let chartValues = [20, 10, 5, 2, 20, 30, 45];
+	let chartLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+	let ctx;
+	let chartCanvas;
+  let chart;
+  let data = {
+						labels: chartLabels,
+						datasets: [{
+								label: 'Revenue',
+								backgroundColor: 'rgb(255, 99, 132)',
+								borderColor: 'rgb(255, 99, 132)',
+								data: chartValues
+						}]
+			};
 
 	onMount(() => {
+    ctx = chartCanvas.getContext('2d');
+    chart = new Chart(ctx, {
+				type: 'line',
+				data: data,
+        options: {
+          animation :{
+            duration: 0
+          },
+          interaction: {
+            intersect: false
+          },
+          plugins: {
+            legend: false
+          },
+          scales: {
+            x: {
+              type: 'linear'
+            }
+          }
+        }
+		});
+
 		const interval = setInterval(() => {
 		    fetch(`api/tlsfront_stats`)
                 .then((response) => response.json())
                 .then((results) => {
                     deployments = results;
-
+                    data.labels = [1,2,3];
+                    data.datasets= Object.keys(deployments).map(k => ({
+                                    label: k,
+                                    fill: true,
+                                    borderColor: "#3e95cd",
+                                    data: deployments[k].sum.map(v => v.tlsfrontThroughput)
+                                  }));
+                    chart.update();
                 });
 		}, 1000);
 
@@ -71,11 +100,7 @@
 <br/>
 <br/>
 
-<Line
-  data={data}
-  width={50}
-  height={25}
-/>
+<canvas bind:this={chartCanvas} id="myChart"></canvas>
 
 
 <style>
