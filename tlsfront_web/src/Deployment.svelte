@@ -9,34 +9,19 @@
         data: [86,114,106,106,107,111,133,221,783,2478],
         label: "Africa",
         borderColor: "#3e95cd",
-        fill: false
+        fill: true
       }, { 
         data: [282,350,411,502,635,809,947,1402,3700,5267],
         label: "Asia",
         borderColor: "#8e5ea2",
-        fill: false
-      }, { 
-        data: [168,170,178,190,203,276,408,547,675,734],
-        label: "Europe",
-        borderColor: "#3cba9f",
-        fill: false
-      }, { 
-        data: [40,20,10,16,24,38,74,167,508,784],
-        label: "Latin America",
-        borderColor: "#e8c3b9",
-        fill: false
-      }, { 
-        data: [6,3,2,2,7,26,82,172,312,433],
-        label: "North America",
-        borderColor: "#c45850",
-        fill: false
+        fill: true
       }
     ]
     }
 
 	onMount(() => {
 		const interval = setInterval(() => {
-		    fetch(`api/stats`)
+		    fetch(`api/tlsfront_stats`)
                 .then((response) => response.json())
                 .then((results) => {
                     deployments = results;
@@ -51,6 +36,8 @@
 
 </script>
 
+<br/>
+<br/>
 
 <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth has-text-left">
     <thead>
@@ -64,25 +51,25 @@
             <th><abbr title="sslConnInitSuccess">SSLConn</abbr></th>
 
             <th><abbr title="tcpActiveConns">ActConn</abbr></th>
-
-            <th><abbr title="Throughput">Thpt</abbr></th>
         </tr>
       </thead>
 
       <tbody>
         {#each Object.entries(deployments) as [Service, ServiceProps]}
         <tr>
-            <td>{Service}</td>
-            <td>{ServiceProps.sum.tcpAcceptSuccess}</td>
-            <td>{ServiceProps.sum.sslAcceptSuccess}</td>
-            <td>{ServiceProps.sum.tcpConnInitSuccess}</td>
-            <td>{ServiceProps.sum.sslConnInitSuccess}</td>
-            <td>{ServiceProps.sum.tcpActiveConns}</td>
-            <td>show</td>
+            <td><strong>{Service}</strong></td>
+            <td>{ServiceProps.sum[ServiceProps.sum.length-1].tcpAcceptSuccess}</td>
+            <td>{ServiceProps.sum[ServiceProps.sum.length-1].sslAcceptSuccess}</td>
+            <td>{ServiceProps.sum[ServiceProps.sum.length-1].tcpConnInitSuccess}</td>
+            <td>{ServiceProps.sum[ServiceProps.sum.length-1].sslConnInitSuccess}</td>
+            <td>{ServiceProps.sum[ServiceProps.sum.length-1].tcpActiveConns}</td>
         </tr>
     {/each}
       </tbody>
 </table>
+
+<br/>
+<br/>
 
 <Line
   data={data}
