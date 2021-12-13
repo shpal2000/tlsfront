@@ -47,7 +47,7 @@
                 .then((response) => response.json())
                 .then((results) => {
                     deployments = results;
-                    data.labels = [...Array(4).keys()];
+                    data.labels = [...Array(10).keys()];
                     data.datasets= Object.keys(deployments).map(k => ({
                                     label: k,
                                     fill: true,
