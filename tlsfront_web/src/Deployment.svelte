@@ -51,7 +51,7 @@
                     data.datasets= Object.keys(deployments).map(k => ({
                                     label: k,
                                     fill: true,
-                                    borderColor: "#3e95cd",
+                                    borderColor: "#ffa700",
                                     data: deployments[k].sum.map(v => v.tlsfrontThroughput)
                                   }));
                     chart.update();
