@@ -10,11 +10,15 @@ tlsserver_app::tlsserver_app(tlsserver_cfg* cfg
 
     m_app_ctx.m_send_recv_len = cfg->send_recv_len;
 
-    m_app_ctx.m_send_recv_buff_len = 4096;
-    m_app_ctx.m_send_recv_buff 
-        = (char*) malloc(m_app_ctx.m_send_recv_buff_len);
+    m_app_ctx.m_recv_buff_len = 4096;
+    m_app_ctx.m_recv_buff 
+        = (char*) malloc(m_app_ctx.m_recv_buff_len);
 
-    memset(m_app_ctx.m_send_recv_buff, 'b', m_app_ctx.m_send_recv_buff_len);
+    m_app_ctx.m_send_buff_len = 512;
+    m_app_ctx.m_send_buff 
+        = (char*) malloc(m_app_ctx.m_send_buff_len);
+
+    memset(m_app_ctx.m_send_buff, 's', m_app_ctx.m_send_buff_len);
 
     ev_socket::set_sockaddr (&m_app_ctx.m_server_addr
                             , cfg->server_ip.c_str()
@@ -109,7 +113,8 @@ tlsserver_app::tlsserver_app(tlsserver_cfg* cfg
     if (m_grp_ctx.m_s_ssl_ctx 
         && m_server_lsocket
         && m_app_ctx.m_stats_sock
-        && m_app_ctx.m_send_recv_buff)
+        && m_app_ctx.m_send_buff
+        && m_app_ctx.m_recv_buff)
     {
         m_init_ok = true;
     }

@@ -30,8 +30,11 @@ struct tlsclient_app_ctx
 
     int m_send_recv_len;
 
-    int m_send_recv_buff_len;
-    char* m_send_recv_buff;
+    int m_send_buff_len;
+    char* m_send_buff;
+
+    int m_recv_buff_len;
+    char* m_recv_buff;
 
     int m_cps;
     uint64_t m_total_conn_count;

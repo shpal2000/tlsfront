@@ -58,12 +58,12 @@ void tlsclient_socket::on_write ()
         {
             int bytes_to_write = m_app_ctx->m_send_recv_len - m_bytes_written;
 
-            if (bytes_to_write > m_app_ctx->m_send_recv_buff_len)
+            if (bytes_to_write > m_app_ctx->m_send_buff_len)
             {
-                bytes_to_write = m_app_ctx->m_send_recv_buff_len;
+                bytes_to_write = m_app_ctx->m_send_buff_len;
             }
 
-            write_next_data (m_app_ctx->m_send_recv_buff
+            write_next_data (m_app_ctx->m_send_buff
                             , 0
                             , bytes_to_write);
         }
@@ -95,9 +95,9 @@ void tlsclient_socket::on_read ()
 {
     if (!m_udp)
     {
-        read_next_data (m_app_ctx->m_send_recv_buff
+        read_next_data (m_app_ctx->m_recv_buff
                         , 0
-                        , m_app_ctx->m_send_recv_buff_len);
+                        , m_app_ctx->m_recv_buff_len);
     }
 }
 
