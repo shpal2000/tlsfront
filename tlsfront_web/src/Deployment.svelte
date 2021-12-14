@@ -74,7 +74,6 @@
         <tr>
             <th class="svc_name"><abbr title="ServiceName">Services</abbr></th>
 
-            <th><abbr title="tcpAcceptSuccess">TcpAccpt</abbr></th>
             <th><abbr title="sslAcceptSuccess">SSLAccpt</abbr></th>
 
             <th><abbr title="tcpConnInitSuccess">TcpConn</abbr></th>
@@ -88,7 +87,6 @@
         {#each Object.entries(deployments) as [Service, ServiceProps]}
         <tr>
             <td><strong>{Service}</strong></td>
-            <td>{ServiceProps.sum[ServiceProps.sum.length-1].tcpAcceptSuccess}</td>
             <td>{ServiceProps.sum[ServiceProps.sum.length-1].sslAcceptSuccess}</td>
             <td>{ServiceProps.sum[ServiceProps.sum.length-1].tcpConnInitSuccess}</td>
             <td>{ServiceProps.sum[ServiceProps.sum.length-1].sslConnInitSuccess}</td>

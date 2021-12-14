@@ -18,6 +18,7 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
     m_app_ctx.m_send_recv_buff 
         = (char*) malloc(m_app_ctx.m_send_recv_buff_len);
 
+    memset(m_app_ctx.m_send_recv_buff, 'a', m_app_ctx.m_send_recv_buff_len);
 
     ev_socket::set_sockaddr (&m_app_ctx.m_server_addr
                             , cfg->server_ip.c_str()
