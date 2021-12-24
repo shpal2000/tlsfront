@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-001
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+            { "name": "macvlan-ens192",
+              "ips": [ "12.20.50.1/16", "12.20.50.2/16", "12.20.50.3/16",
+                       "100.20.50.1/16", "100.20.50.2/16", "100.20.50.3/16"  ],
+              "mac": "c2:b0:57:49:47:f1"
+            }]'
+spec:
+  containers:
+  - name: client-001
+    command: ["ping", "12.20.60.1"]
+    image: alpine
