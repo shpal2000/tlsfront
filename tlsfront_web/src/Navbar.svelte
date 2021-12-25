@@ -7,9 +7,9 @@
 
 <nav class="navbar is-dark has-shadow" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">
-		<a class="navbar-item" href="https://www.gigamon.com">
+		<a class="navbar-item" href="https://www.tlspack.com">
 			<!-- svelte-ignore a11y-missing-attribute -->
-			<img src="/assets/gigamon.png" width="32" height="32">
+			<img src="/assets/tlspack.png" width="32" height="32">
 			&nbsp;&nbsp;&nbsp;&nbsp;
 			[&nbsp;FM&nbsp;]
 		</a>
