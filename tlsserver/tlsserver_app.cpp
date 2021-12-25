@@ -36,7 +36,7 @@ tlsserver_app::tlsserver_app(tlsserver_cfg* cfg
 
     m_init_ok = false;
 
-    m_grp_ctx.m_s_ssl_ctx = SSL_CTX_new(TLS_client_method());
+    m_grp_ctx.m_s_ssl_ctx = SSL_CTX_new(TLS_server_method());
     if (m_grp_ctx.m_s_ssl_ctx)
     {
         SSL_CTX_set_min_proto_version (m_grp_ctx.m_s_ssl_ctx
