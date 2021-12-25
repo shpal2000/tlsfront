@@ -1,7 +1,7 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: macvlan-ens192
+  name: ens192
 spec: 
   config: '{
       "cniVersion": "0.3.1",
@@ -16,9 +16,6 @@ spec:
             "routes": [
             ] 
           }
-        }, {
-          "capabilities": { "mac": true },
-          "type": "tuning"
         }
       ]
     }'
