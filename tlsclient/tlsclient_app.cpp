@@ -80,6 +80,14 @@ tlsclient_app::tlsclient_app(tlsclient_cfg* cfg
 
     m_stop = false;
     m_curr_conn_count = 0;
+
+    char next_ip[128];
+    strcpy (next_ip, cfg->client_ip.c_str());
+    ev_sockaddrx* next_addr = new ev_sockaddrx (10000, 60000);
+    ev_socket::set_sockaddr (&next_addr->m_addr, next_ip, 0);
+    m_app_ctx.m_clnt_addr_pool.push_back(next_addr);
+    m_app_ctx.m_clnt_addr_count = 1;
+    m_app_ctx.m_clnt_addr_index = 0;
 }
 
 
@@ -115,19 +123,45 @@ void tlsclient_app::run_iter(bool tick_sec)
 
     if (to_new_connect())
     {
-        tlsclient_socket* client_socket 
-            = (tlsclient_socket*) 
-            new_tcp_connect (NULL
-                            , &m_app_ctx.m_server_addr
-                            , &m_app_ctx.m_stats_arr
-                            , NULL
-                            , &m_app_ctx.m_sock_opt);
         
-        if (client_socket)
+        ev_sockaddrx* next_client_addr 
+            = m_app_ctx.m_clnt_addr_pool[m_app_ctx.m_clnt_addr_index];
+        
+        m_app_ctx.m_clnt_addr_index++;
+        if (m_app_ctx.m_clnt_addr_index == m_app_ctx.m_clnt_addr_count) 
         {
-            m_curr_conn_count++;
-            client_socket->m_app_ctx = &m_app_ctx;
-            client_socket->m_grp_ctx = &m_grp_ctx;
+            m_app_ctx.m_clnt_addr_index = 0;
+        }
+
+        u_short port = next_client_addr->m_portq->get_port();
+
+        if (port)
+        {
+            ev_socket::set_sockaddr_port(&next_client_addr->m_addr, port);
+
+            tlsclient_socket* client_socket 
+                = (tlsclient_socket*) 
+                new_tcp_connect (&next_client_addr->m_addr
+                                , &m_app_ctx.m_server_addr
+                                , &m_app_ctx.m_stats_arr
+                                , next_client_addr->m_portq
+                                , &m_app_ctx.m_sock_opt);
+            
+            if (client_socket)
+            {
+                m_curr_conn_count++;
+                client_socket->m_app_ctx = &m_app_ctx;
+                client_socket->m_grp_ctx = &m_grp_ctx;
+            }
+            else 
+            {
+                next_client_addr->m_portq->return_port(port);
+                //todo stats
+            }
+        }
+        else
+        {
+             //todo stats
         }
     }
 }

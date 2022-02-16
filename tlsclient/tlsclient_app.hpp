@@ -39,6 +39,10 @@ struct tlsclient_app_ctx
     int m_cps;
     uint64_t m_total_conn_count;
     uint64_t m_max_active_conn_count;
+
+    std::vector<ev_sockaddrx*> m_clnt_addr_pool;
+    int m_clnt_addr_index;
+    int m_clnt_addr_count;
 };
 
 class tlsclient_app : public tlspack_app

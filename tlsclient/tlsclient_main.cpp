@@ -26,6 +26,9 @@ int main(int /*argc*/, char ** /*argv*/)
     app_cfg.server_port = cfg_json["server_port"].get<int>();
     app_cfg.server_ssl = cfg_json["server_ssl"].get<int>();
 
+    app_cfg.client_ip = cfg_json["client_ip"].get<std::string>();
+
+
     app_cfg.stats_ip = cfg_json["stats_ip"].get<std::string>();
     app_cfg.stats_port = cfg_json["stats_port"].get<int>();
 
